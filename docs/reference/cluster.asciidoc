@@ -1,5 +1,5 @@
 [[cluster]]
-= Cluster APIs
+= 集群接口
 
 [partintro]
 --

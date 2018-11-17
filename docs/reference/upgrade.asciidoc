@@ -1,5 +1,5 @@
 [[setup-upgrade]]
-= Upgrade Elasticsearch
+= 升级
 
 [partintro]
 --

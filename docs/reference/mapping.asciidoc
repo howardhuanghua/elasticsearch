@@ -1,5 +1,5 @@
 [[mapping]]
-= Mapping
+= 映射
 
 [partintro]
 --

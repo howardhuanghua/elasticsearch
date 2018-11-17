@@ -1,6 +1,6 @@
 [glossary]
 [[glossary]]
-= Glossary of terms
+= 术语汇编
 
 [glossary]
 [[glossary-analysis]] analysis ::

@@ -1,5 +1,5 @@
 [[search-aggregations]]
-= Aggregations
+= 聚合
 
 [partintro]
 --

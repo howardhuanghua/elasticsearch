@@ -1,5 +1,5 @@
 [[api-conventions]]
-= API Conventions
+= 接口规范
 
 [partintro]
 --

@@ -1,5 +1,5 @@
 [[query-dsl]]
-= Query DSL
+= 查询语句
 
 [partintro]
 --
