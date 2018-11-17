@@ -1,5 +1,5 @@
 [[cat]]
-= cat APIs
+= cat 接口
 
 [partintro]
 --

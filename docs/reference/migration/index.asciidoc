@@ -1,5 +1,5 @@
 [[breaking-changes]]
-= Breaking changes
+= 重要变更
 
 [partintro]
 --

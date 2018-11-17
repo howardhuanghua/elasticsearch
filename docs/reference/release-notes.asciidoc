@@ -1,5 +1,5 @@
 [[es-release-notes]]
-= Release Notes
+= 版本说明
 
 [partintro]
 --

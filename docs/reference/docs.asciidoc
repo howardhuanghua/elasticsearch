@@ -1,5 +1,5 @@
 [[docs]]
-= Document APIs
+= 文档接口
 
 [partintro]
 --

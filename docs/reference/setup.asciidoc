@@ -1,5 +1,5 @@
 [[setup]]
-= Set up Elasticsearch
+= 搭建
 
 [partintro]
 --

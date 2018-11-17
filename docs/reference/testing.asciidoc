@@ -1,5 +1,5 @@
 [[testing]]
-= Testing
+= 测试
 
 [partintro]
 --
