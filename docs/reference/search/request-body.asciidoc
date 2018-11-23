@@ -1,9 +1,9 @@
 [[search-request-body]]
-== Request Body Search
+== 使用请求体搜索
 
-The search request can be executed with a search DSL, which includes the
-<<query-dsl,Query DSL>>, within its body. Here is an
-example:
+搜索请求可以通过搜索 DSL 来执行，其请求体中包含
+<<query-dsl,查询 DSL>> 。
+下面是一个例子：
 
 [source,js]
 --------------------------------------------------
@@ -17,7 +17,7 @@ GET /twitter/_search
 // CONSOLE
 // TEST[setup:twitter]
 
-And here is a sample response:
+以及响应的示例：
 
 [source,js]
 --------------------------------------------------
@@ -53,87 +53,81 @@ And here is a sample response:
 // TESTRESPONSE[s/"took": 1/"took": $body.took/]
 
 [float]
-=== Parameters
+=== 参数
 
 [horizontal]
 `timeout`::
 
-    A search timeout, bounding the search request to be executed within the
-    specified time value and bail with the hits accumulated up to that point
-    when expired. Search requests are canceled after the timeout is reached using
-    the <<global-search-cancellation>> mechanism.
-    Defaults to no timeout. See <<time-units>>.
+    搜索超时设置，将搜索请求绑定在指定时间限制内执行。
+    并保证返回超时时已经累积的命中结果。利用 <<global-search-cancellation>> 机制，
+    在搜索请求达到超时时限后其将被取消。
+    默认为无超时，请参阅 <<time-units>> 。
 
 `from`::
 
-    To retrieve hits from a certain offset. Defaults to `0`.
+    从指定的偏移处取回命中结果。默认为 `0` 。
 
 `size`::
 
-    The number of hits to return. Defaults to `10`. If you do not care about
-    getting some hits back but only about the number of matches and/or
-    aggregations, setting the value to `0` will help performance.
+    需要返回的命中结果的数量。默认为 `10` 。如果你对返回一些命中的结果并不关心，
+    而只关注匹配到的结果总数以及/或者希望进行一些聚合操作，
+    将该值设置为 `0` 会对性能有所帮助。
 
 `search_type`::
 
-    The type of the search operation to perform. Can be
-    `dfs_query_then_fetch` or `query_then_fetch`.
-    Defaults to `query_then_fetch`.
-    See <<search-request-search-type,_Search Type_>> for more.
+    待执行搜索操作的类型。可以是
+    `dfs_query_then_fetch` 或 `query_then_fetch` 。
+    默认为 `query_then_fetch` 。
+    详见 <<search-request-search-type,_搜索类型_>> 。
 
 `request_cache`::
 
-    Set to `true` or `false` to enable or disable the caching
-    of search results for requests where `size` is 0, ie
-    aggregations and suggestions (no top hits returned).
-    See <<shard-request-cache>>.
+    当 `size` 被设置为 0 时，将该值设置为 `true` 或 `false`
+    来启用或禁用搜索结果的缓存，例如聚合以及搜索建议（无命中结果返回）。
+    参阅 <<shard-request-cache>> 。
 
 `allow_partial_search_results`::
 
-    Set to `false` to return an overall failure if the request would produce partial 
-    results. Defaults to true, which will allow partial results in the case of timeouts
-    or partial failures. This default can be controlled using the cluster-level setting
-    `search.default_allow_partial_results`.
+    如若设置为 `false` ，当搜索产生部分结果时将整体返回为失败。
+    默认为 true，当超时或部分失败时允许返回部分结果。
+    该默认值可以通过集群级别的配置项
+    `search.default_allow_partial_results` 来控制。
 
 `terminate_after`::
 
-    The maximum number of documents to collect for each shard,
-    upon reaching which the query execution will terminate early. If set, the
-    response will have a boolean field `terminated_early` to indicate whether
-    the query execution has actually terminated_early. Defaults to no
-    terminate_after.
+    每个分片采集的最大文档数量，当超过该值时查询执行会提前终止。
+    当设置后，响应中会包含一个布尔字段 `terminated_early`
+    来表示查询执行是否被提前终止。
+    默认为未设置 terminate_after 。
 
 `batched_reduce_size`::
 
-    The number of shard results that should be reduced  at once on the
-    coordinating node. This value should be used as a protection  mechanism to
-    reduce the memory overhead per search request if the potential  number of
-    shards in the request can be large.
+    在协调节点中应当立即减少的分片结果数量。
+    如果搜索请求的潜在分片数可能非常大时，
+    该值应当作为一种减少对于每个请求内存开销的保护机制。
 
 
 
-Out of the above, the `search_type`, `request_cache` and the `allow_partial_search_results` 
-settings must be passed as query-string parameters. The rest of the search request should 
-be passed within the body itself. The body content can also be passed as a REST
-parameter named `source`.
+除此之外，必须将 `search_type` 、 `request_cache` 以及 `allow_partial_search_results`
+作为查询字符串参数进行传递。请求的其他部分应当放在自身的请求体中进行传递。
+请求体的内容也可以作为一个 REST 参数 `source` 进行传递。
 
-Both HTTP GET and HTTP POST can be used to execute search with body. Since not
-all clients support GET with body, POST is allowed as well.
+HTTP GET 以及 HTTP POST 都可以用于执行带请求体的搜索请求。
+由于并不是所有的客户端都支持带请求体的 GET 请求，
+POST 请求也是允许的。
 
 [float]
-=== Fast check for any matching docs
+=== 快速检查是否命中了任意文档
 
-NOTE: `terminate_after` is always applied **after** the `post_filter` and stops
-       the query as well as the aggregation executions when enough hits have been
-       collected on the shard. Though the doc count on aggregations may not reflect
-       the `hits.total` in the response since aggregations are applied **before** the
-       post filtering.
+NOTE: `terminate_after` 总是在 `post_filter` **之后** 应用并停止查询，
+       同样地，当在分片中收集到足够的命中结果后停止聚合的执行操作。
+       然而聚合的文档数可能不会反映出响应结果中的 `hits.total` 值，
+       因为聚合操作是在后续的过滤操作 **之前** 被应用的。
 
-In case we only want to know if there are any documents matching a
-specific query, we can set the `size` to `0` to indicate that we are not
-interested in the search results. Also we can set `terminate_after` to `1`
-to indicate that the query execution can be terminated whenever the first
-matching document was found (per shard).
+假如我们只想知道是否有任意文档匹配到某个指定的搜索请求，
+我们可以将 `size` 设置为 `0` 来表示我们对命中的具体结果并不感兴趣。
+并且我们可以将 `terminate_after` 设置为 `1`
+来表示搜索的执行可以在匹配到第一个文档之后就结束（每个分片）。
 
 [source,js]
 --------------------------------------------------
@@ -142,12 +136,10 @@ GET /_search?q=message:number&size=0&terminate_after=1
 // CONSOLE
 // TEST[setup:twitter]
 
-The response will not contain any hits as the `size` was set to `0`. The
-`hits.total` will be either equal to `0`, indicating that there were no
-matching documents, or greater than `0` meaning that there were at least
-as many documents matching the query when it was early terminated.
-Also if the query was terminated early, the `terminated_early` flag will
-be set to `true` in the response.
+当 `size` 为 `0` 时，响应中不会包含任何命中结果。
+`hits.total` 可能是 `0` ，表示没有任何匹配的文档，
+或者大于 `0` 意味着当请求被提前终止时至少有如此多的文档匹配该查询。
+如果查询被提前终止，响应中的 `terminated_early` 标志会被设置为 `true` 。
 
 [source,js]
 --------------------------------------------------
@@ -170,12 +162,10 @@ be set to `true` in the response.
 --------------------------------------------------
 // TESTRESPONSE[s/"took": 3/"took": $body.took/]
 
-The `took` time in the response contains the milliseconds that this request
-took for processing, beginning quickly after the node received the query, up
-until all search related work is done and before the above JSON is returned
-to the client. This means it includes the time spent waiting in thread pools,
-executing a distributed search across the whole cluster and gathering all the
-results.
+响应中的 `took` 字段表示处理该请求所消耗的毫秒数，
+当节点接收到该请求时便开始计时，在完成所有搜索相关工作后，
+上文 JSON 返回至客户端之前停止计时。这意味着它包含了等待线程池所消耗的时间，
+以及跨整个集群执行分布式搜索并获取所有结果的时间。
 
 include::request/query.asciidoc[]
 

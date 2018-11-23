@@ -1,17 +1,15 @@
 [[search-search]]
-== Search
+== 搜索
 
-The search API allows you to execute a search query and get back search hits
-that match the query. The query can either be provided using a simple
-<<search-uri-request,query string as a parameter>>, or using a
-<<search-request-body,request body>>.
+搜索 API 允许你执行搜索请求并返回匹配的搜索结果。
+我们既可以通过一个简单的 <<search-uri-request, 查询字符串作为参数>>,
+也可以通过 <<search-request-body, 请求体>> 来指定查询请求。
 
 ["float",id="search-multi-index"]
-=== Multi-Index
+=== 多索引
 
-All search APIs can be applied across multiple indices with support for
-the <<multi-index,multi index syntax>>. For
-example, we can search on all documents within the twitter index:
+所有的搜索 API 都可以借助 <<multi-index, 多索引语法>> 来应用于多个索引。
+例如，我们可以搜索 twitter 索引中的所有文档：
 
 [source,js]
 --------------------------------------------------
@@ -20,8 +18,8 @@ GET /twitter/_search?q=user:kimchy
 // CONSOLE
 // TEST[setup:twitter]
 
-We can also search all documents with a certain tag across several indices
-(for example, when there is one index per user):
+我们还可以搜索具有指定标签的若干个索引中所有的推文
+（比如说，当每个用户都有自己的索引）：
 
 [source,js]
 --------------------------------------------------
@@ -30,7 +28,7 @@ GET /kimchy,elasticsearch/_search?q=tag:wow
 // CONSOLE
 // TEST[s/^/PUT kimchy\nPUT elasticsearch\n/]
 
-Or we can search across all available indices using `_all`:
+或者我们可以使用 `_all` 来搜索所有可用索引中的所有推文：
 
 [source,js]
 ---------------------------------------------------

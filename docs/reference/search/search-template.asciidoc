@@ -1,8 +1,8 @@
 [[search-template]]
-== Search Template
+== 搜索模板
 
-The `/_search/template` endpoint allows to use the mustache language to pre render search requests,
-before they are executed and fill existing templates with template parameters.
+`/_search/template` 端点允许使用 mustache 语言来预先渲染搜索请求，
+在它们被执行之前将会使用模板参数来对该模板进行填充。
 
 [source,js]
 ------------------------------------------
@@ -22,20 +22,18 @@ GET _search/template
 // CONSOLE
 // TEST[setup:twitter]
 
-For more information on how Mustache templating and what kind of templating you
-can do with it check out the http://mustache.github.io/mustache.5.html[online
-documentation of the mustache project].
+更多关于 Mustache 模板的信息以及可以用它做怎样的模板化请参阅
+http://mustache.github.io/mustache.5.html[mustache 项目的在线文档] 。
 
-NOTE: The mustache language is implemented in Elasticsearch as a sandboxed
-scripting language, hence it obeys settings that may be used to enable or
-disable scripts per type and context as described in the
-<<allowed-script-types-setting, scripting docs>>
+NOTE: Mustache 作为脚本语言在 Elasticsearch 沙箱中执行，
+因此它受到用来启用或禁用索引类型和会话中脚本的开关控制，其在以下
+<<allowed-script-types-setting, 脚本文档>> 中描述
 
 [float]
-==== More template examples
+==== 更多模板的例子
 
 [float]
-===== Filling in a query string with a single value
+===== 用单个值来填充查询字符串
 
 [source,js]
 ------------------------------------------
@@ -57,10 +55,9 @@ GET _search/template
 // TEST[setup:twitter]
 
 [float]
-===== Converting parameters to JSON
+===== 将参数转化为 JSON
 
-The `{{#toJson}}parameter{{/toJson}}` function can be used to convert parameters
-like maps and array to their JSON representation:
+函数 `{{#toJson}}parameter{{/toJson}}` 可以用来把参数例如字典和数组转化成它们的 JSON 表现形式：
 
 [source,js]
 ------------------------------------------
@@ -76,7 +73,7 @@ GET _search/template
 ------------------------------------------
 // CONSOLE
 
-which is rendered as:
+将被渲染为：
 
 [source,js]
 ------------------------------------------
@@ -93,7 +90,7 @@ which is rendered as:
 ------------------------------------------
 // NOTCONSOLE
 
-A more complex example substitutes an array of JSON objects:
+下面这个例子略微复杂，替换一个包含 JSON 对象的数组：
 
 [source,js]
 ------------------------------------------
@@ -110,7 +107,7 @@ GET _search/template
 ------------------------------------------
 // CONSOLE
 
-which is rendered as:
+将被渲染为：
 
 [source,js]
 ------------------------------------------
@@ -138,8 +135,7 @@ which is rendered as:
 [float]
 ===== Concatenating array of values
 
-The `{{#join}}array{{/join}}` function can be used to concatenate the
-values of an array as a comma delimited string:
+函数 `{{#join}}array{{/join}}` 可以用来将数组中的值拼接为一个逗号分割的字符串：
 
 [source,js]
 ------------------------------------------
@@ -159,7 +155,7 @@ GET _search/template
 ------------------------------------------
 // CONSOLE
 
-which is rendered as:
+将被渲染为：
 
 [source,js]
 ------------------------------------------
@@ -173,7 +169,7 @@ which is rendered as:
 ------------------------------------------
 // NOTCONSOLE
 
-The function also accepts a custom delimiter:
+该函数也接受自定义的分割符：
 
 [source,js]
 ------------------------------------------
@@ -201,7 +197,7 @@ GET _search/template
 ------------------------------------------
 // CONSOLE
 
-which is rendered as:
+将被渲染为：
 
 [source,js]
 ------------------------------------------
@@ -221,9 +217,9 @@ which is rendered as:
 // NOTCONSOLE
 
 [float]
-===== Default values
+===== 默认值
 
-A default value is written as `{{var}}{{^var}}default{{/var}}` for instance:
+默认值可以写为 `{{var}}{{^var}}default{{/var}}` 例如：
 
 [source,js]
 ------------------------------------------
@@ -243,7 +239,7 @@ A default value is written as `{{var}}{{^var}}default{{/var}}` for instance:
 ------------------------------------------
 // NOTCONSOLE
 
-When `params` is `{ "start": 10, "end": 15 }` this query would be rendered as:
+当 `params` 为 `{ "start": 10, "end": 15 }` 时，这个请求将被渲染为：
 
 [source,js]
 ------------------------------------------
@@ -258,8 +254,7 @@ When `params` is `{ "start": 10, "end": 15 }` this query would be rendered as:
 ------------------------------------------
 // NOTCONSOLE
 
-But when `params` is `{ "start": 10 }` this query would use the default value
-for `end`:
+但是当 `params` 为 `{ "start": 10 }` 时，该请求将使用 `end` 的默认值：
 
 [source,js]
 ------------------------------------------
@@ -275,14 +270,13 @@ for `end`:
 // NOTCONSOLE
 
 [float]
-===== Conditional clauses
+===== 条件语句
 
-Conditional clauses cannot be expressed using the JSON form of the template.
-Instead, the template *must* be passed as a string.  For instance, let's say
-we wanted to run a `match` query on the `line` field, and optionally wanted
-to filter by line numbers, where `start` and `end` are optional.
+我们不能使用 JSON 形式的模板来表示条件语句，模板 **必须** 以字符串的形式来传递。
+举例来说，假使我们想要对 `line` 字段运行一个 `match` 查询，并视需要按行号来做过滤，
+在这里 `start` 与 `end` 都是可选的。
 
-The `params` would look like:
+`params` 看起来会是这样：
 [source,js]
 ------------------------------------------
 {
@@ -296,9 +290,9 @@ The `params` would look like:
 }
 ------------------------------------------
 // NOTCONSOLE
-<1> All three of these elements are optional.
+<1> 这里的三个元素都是可选的。
 
-We could write the query as:
+我们可以将查询写为如下形式：
 
 [source,js]
 ------------------------------------------
@@ -330,21 +324,19 @@ We could write the query as:
 }
 ------------------------------------------
 // NOTCONSOLE
-<1> Fill in the value of param `text`
-<2> Include the `range` filter only if `line_no` is specified
-<3> Include the `gte` clause only if `line_no.start` is specified
-<4> Fill in the value of param `line_no.start`
-<5> Add a comma after the `gte` clause only if `line_no.start`
-    AND `line_no.end` are specified
-<6> Include the `lte` clause only if `line_no.end` is specified
-<7> Fill in the value of param `line_no.end`
+<1> 以参数 `text` 的值进行填充
+<2> 仅当指定了 `line_no` 时，包含 `range` 过滤器
+<3> 仅当指定了 `line_no.start` 时，包含 `gte` 语句
+<4> 以参数 `line_no.start` 的值进行填充
+<5> 仅当指定了 `line_no.start` 与 `line_no.end` 时，在 `gte` 语句后面添加一个逗号
+<6> 仅当指定了 `line_no.end` 时，包含 `lte` 语句
+<7> 以参数 `line_no.end` 的值进行填充
 
 [NOTE]
 ==================================
-As written above, this template is not valid JSON because it includes the
-_section_ markers like `{{#line_no}}`.  For this reason, the template should
-either be stored in a file (see <<pre-registered-templates>>) or, when used
-via the REST API, should be written as a string:
+如上所述，这个模板并不是一个合法的 JSON因为它包含了像 `{{#line_no}}` 这样的 _段_ 标记。
+因此，这样的模板应当被存储在文件中（见 <<pre-registered-templates>>），
+或者当使用 REST API 时应当写成字符串的形式：
 
 [source,js]
 --------------------
@@ -355,12 +347,11 @@ via the REST API, should be written as a string:
 
 
 [float]
-===== Encoding URLs
+===== URL 编码
 
-The `{{#url}}value{{/url}}` function can be used to encode a string value
-in a HTML encoding form as defined in by the http://www.w3.org/TR/html4/[HTML specification].
+`{{#url}}value{{/url}}` 可以用来将字符串的值编码为 HTML 编码的形式，具体定义请参考 http://www.w3.org/TR/html4/[HTML 规范]。
 
-As an example, it is useful to encode a URL:
+在以下例子中，可以很方便地编码一个 URL：
 
 [source,js]
 ------------------------------------------
@@ -381,7 +372,7 @@ GET _render/template
 ------------------------------------------
 // CONSOLE
 
-The previous query will be rendered as:
+上面的查询将会被渲染为：
 
 [source,js]
 ------------------------------------------
@@ -400,9 +391,9 @@ The previous query will be rendered as:
 
 [float]
 [[pre-registered-templates]]
-===== Pre-registered template
+===== 预注册模板
 
-You can register search templates by using the stored scripts api.
+你可以使用存储脚本 API 来注册搜索模板。
 
 [source,js]
 ------------------------------------------
@@ -425,8 +416,7 @@ POST _scripts/<templatename>
 
 //////////////////////////
 
-We want to be sure that the template has been created,
-because we'll use it later.
+我们想要确认模板已经被添加，因为稍后我们会使用它。
 
 [source,js]
 --------------------------------------------------
@@ -438,7 +428,7 @@ because we'll use it later.
 
 //////////////////////////
 
-This template can be retrieved by
+该模板可以通过以下方式来获取
 
 [source,js]
 ------------------------------------------
@@ -447,7 +437,7 @@ GET _scripts/<templatename>
 // CONSOLE
 // TEST[continued]
 
-which is rendered as:
+将会渲染为：
 
 [source,js]
 ------------------------------------------
@@ -465,7 +455,7 @@ which is rendered as:
 ------------------------------------------
 // TESTRESPONSE
 
-This template can be deleted by
+该模板可以通过以下方式来删除
 
 [source,js]
 ------------------------------------------
@@ -476,8 +466,7 @@ DELETE _scripts/<templatename>
 
 //////////////////////////
 
-We want to be sure that the template has been created,
-because we'll use it later.
+我们想要确认模板已经被添加，因为稍后我们会使用它。
 
 [source,js]
 --------------------------------------------------
@@ -489,7 +478,7 @@ because we'll use it later.
 
 //////////////////////////
 
-To use a stored template at search time use:
+若想要在搜索时使用一个已经贮存的模板：
 
 [source,js]
 ------------------------------------------
@@ -503,12 +492,12 @@ GET _search/template
 ------------------------------------------
 // CONSOLE
 // TEST[catch:missing]
-<1> Name of the stored template script.
+<1> 已经贮存的模板脚本名。
 
 [float]
-==== Validating templates
+==== 验证模板
 
-A template can be rendered in a response with given parameters using
+一个模板可以在响应中通过指定的参数来渲染
 
 [source,js]
 ------------------------------------------
@@ -524,7 +513,7 @@ GET _render/template
 ------------------------------------------
 // CONSOLE
 
-This call will return the rendered template:
+该调用将返回渲染后的模板：
 
 [source,js]
 ------------------------------------------
@@ -542,9 +531,9 @@ This call will return the rendered template:
 }
 ------------------------------------------
 // TESTRESPONSE
-<1> `status` array has been populated with values from the `params` object.
+<1> `status` 数组已经借由 `params` 对象的值来修改。
 
-Pre-registered templates can also be rendered using
+预注册模板同样可以按以下方式渲染：
 
 [source,js]
 ------------------------------------------
@@ -560,7 +549,7 @@ GET _render/template/<template_name>
 [float]
 ===== Explain
 
-You can use `explain` parameter when running a template:
+在运行一个模板的时候你可以指定 `explain` 参数：
 
 [source,js]
 ------------------------------------------
@@ -579,7 +568,7 @@ GET _search/template
 [float]
 ===== Profiling
 
-You can use `profile` parameter when running a template:
+在运行一个模板的时候你可以指定 `profile` 参数：
 
 [source,js]
 ------------------------------------------
@@ -596,13 +585,11 @@ GET _search/template
 // TEST[catch:missing]
 
 [[multi-search-template]]
-== Multi Search Template
+== 多模板搜索
 
-The multi search template API allows to execute several search template
-requests within the same API using the `_msearch/template` endpoint.
+多模板搜索 API 允许通过 `_msearch/template` 端点使用相同的 API 执行若干个模板搜索请求。
 
-The format of the request is similar to the <<search-multi-search, Multi
-Search API>> format:
+请求的格式类似于 <<search-multi-search, 多搜索 API>> 的格式：
 
 [source,js]
 --------------------------------------------------
@@ -613,11 +600,11 @@ body\n
 --------------------------------------------------
 // NOTCONSOLE
 
-The header part supports the same `index`, `search_type`,
-`preference`, and `routing` options as the usual Multi Search API.
+header 部分与通常的多搜索 API 一样支持 `index` 、 `search_type` 、
+`preference` 以及 `routing` 选项。
 
-The body includes a search template body request and supports inline,
-stored and file templates. Here is an example:
+body 部分包含一个模板搜索体，支持内联（Inline）、预存储以及文件模板。
+如以下：
 
 [source,js]
 --------------------------------------------------
@@ -631,13 +618,10 @@ $ cat requests
 $ curl -H "Content-Type: application/x-ndjson" -XGET localhost:9200/_msearch/template --data-binary "@requests"; echo
 --------------------------------------------------
 // NOTCONSOLE
-// Not converting to console because this shows how curl works
-<1> Inline search template request
+// 未转换为 console 的形式，因为我们想要用 curl 来展示如何是工作的
+<1> 内联模板搜索请求
 
-<2> Search template request based on a stored template
+<2> 模板搜索请求基于一个已贮存的模板
 
-The response returns a `responses` array, which includes the search template
-response for each search template request matching its order in the original
-multi search template request. If there was a complete failure for that specific
-search template request, an object with `error` message will be returned in place
-of the actual search response.
+响应中包含一个 `responses` 数组，其中包含了每个模板搜索请求的响应，顺序按照原始多模板搜索请求中的顺序。
+若其中的某个模板搜索完全失败，其对应的响应会替换为包含 `error` 消息的对象。

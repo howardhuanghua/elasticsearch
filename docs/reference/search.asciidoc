@@ -1,20 +1,18 @@
 [[search]]
-= 查询接口
+= 搜索 API
 
 [partintro]
 --
 
-Most search APIs are <<search-multi-index,multi-index>>, with the
-exception of the <<search-explain>> endpoints.
+大部分搜索 API 都可以应用于 <<search-multi-index, 多个索引>>， 只有 <<search-explain>> 是个例外。
 
 [float]
 [[search-routing]]
-== Routing
+== 路由选择
 
-When executing a search, it will be broadcast to all the index/indices
-shards (round robin between replicas). Which shards will be searched on
-can be controlled by providing the `routing` parameter. For example,
-when indexing tweets, the routing value can be the user name:
+当执行一个搜索时，它会被广播至所有索引分片（在副本中轮询）。
+可以通过提供 `routing` 参数来控制哪些分片将会被检索。
+例如，当索引“推文”时，可以使用用户名作为路由值：
 
 [source,js]
 --------------------------------------------------
@@ -27,9 +25,8 @@ POST /twitter/_doc?routing=kimchy
 --------------------------------------------------
 // CONSOLE
 
-In such a case, if we want to search only on the tweets for a specific
-user, we can specify it as the routing, resulting in the search hitting
-only the relevant shard:
+在这种情况下，如果我们想要搜索一个指定用户的推文时，
+我们可以指定该用户名作为路由值，使得搜索只会命中相关的分片：
 
 [source,js]
 --------------------------------------------------
@@ -52,26 +49,22 @@ POST /twitter/_search?routing=kimchy
 // CONSOLE
 // TEST[continued]
 
-The routing parameter can be multi valued represented as a comma
-separated string. This will result in hitting the relevant shards where
-the routing values match to.
+路由选择参数可以使用逗号分隔的字符串来指定多个值。
+这样就只会命中匹配到路由值的对应分片。
 
 [float]
 [[search-adaptive-replica]]
-== Adaptive Replica Selection
+== 自适应副本选择
 
-As an alternative to requests being sent to copies of the data in a round robin
-fashion, you may enable adaptive replica selection. This allows the coordinating
-node to send the request to the copy deemed "best" based on a number of
-criteria:
+请求默认会以轮询的方式发送至数据副本中，作为替代，你可以启动自适应副本选择。
+这允许协调节点基于以下标准将请求发送至被认为是“最好的”副本中：
 
-- Response time of past requests between the coordinating node and the node
-  containing the copy of the data
-- Time past search requests took to execute on the node containing the data
-- The queue size of the search threadpool on the node containing the data
+- 在该协调节点与持有该数据的副本之间历史请求的响应时间
+- 持有该数据的节点历史搜索请求的响应时间
+- 持有该数据的节点的搜索线程池队列大小
 
-This can be turned on by changing the dynamic cluster setting
-`cluster.routing.use_adaptive_replica_selection` from `false` to `true`:
+若想要开启，可以将集群动态配置
+`cluster.routing.use_adaptive_replica_selection` 由 `false` 修改为 `true` ：
 
 [source,js]
 --------------------------------------------------
@@ -86,13 +79,11 @@ PUT /_cluster/settings
 
 [float]
 [[stats-groups]]
-== Stats Groups
+== 统计信息群组
 
-A search can be associated with stats groups, which maintains a
-statistics aggregation per group. It can later be retrieved using the
-<<indices-stats,indices stats>> API
-specifically. For example, here is a search body request that associate
-the request with two different groups:
+一个搜索请求可以被关联至统计信息群组，它按照群组来维护统计信息聚合。
+稍后可以通过 <<indices-stats, 索引状态>> API 来获取具体信息。
+例如，这是一个关联了两个不同群组的搜索请求体：
 
 [source,js]
 --------------------------------------------------
@@ -109,53 +100,44 @@ POST /_search
 
 [float]
 [[global-search-timeout]]
-== Global Search Timeout
+== 全局搜索超时设置
 
-Individual searches can have a timeout as part of the
-<<search-request-body>>. Since search requests can originate from many
-sources, Elasticsearch has a dynamic cluster-level setting for a global
-search timeout that applies to all search requests that do not set a
-timeout in the request body. These requests will be cancelled after
-the specified time using the mechanism described in the following section on
-<<global-search-cancellation>>. Therefore the same caveats about timeout
-responsiveness apply.
+每个搜索请求都可以在 <<search-request-body>> 中设置独立的超时时间。
+搜索请求可能来自许多不同的来源，Elasticsearch 具有一个动态的集群级别的全局搜索超时配置项，
+它对所有未在请求体中设置超时时间的搜索请求都将生效。
+在超过指定时间后这些请求将会被取消，具体取消机制在以下章节中有所描述 <<global-search-cancellation>>。
+同样地，也会收到超时响应答复。
 
-The setting key is `search.default_search_timeout` and can be set using the
-<<cluster-update-settings>> endpoints. The default value is no global timeout.
-Setting this value to `-1` resets the global search timeout to no timeout.
+配置项为 `search.default_search_timeout` ，可以通过
+<<cluster-update-settings>> 来进行配置。默认为没有全局超时。
+将该项的值设置为 `-1` 可以将全局搜索超时时间重置为无超时。
 
 [float]
 [[global-search-cancellation]]
-== Search Cancellation
+== 取消搜索
 
-Searches can be cancelled using standard <<task-cancellation,task cancellation>>
-mechanism. By default, a running search only checks if it is cancelled or
-not on segment boundaries, therefore the cancellation can be delayed by large
-segments. The search cancellation responsiveness can be improved by setting
-the dynamic cluster-level setting `search.low_level_cancellation` to `true`.
-However, it comes with an additional overhead of more frequent cancellation
-checks that can be noticeable on large fast running search queries. Changing this
-setting only affects the searches that start after the change is made.
+可以使用标准的 <<task-cancellation, 取消任务>> 机制来取消搜索请求。
+默认情况下，一个运行中的搜索请求只会在 segment 边界处检查它是否已经被取消，
+因此在遇到巨大的 segment 时，取消请求可能会延迟。
+取消搜索请求的响应能力可以通过修改动态集群级别配置项来提高，
+将 `search.low_level_cancellation` 设置为 `true` 。
+然而，更加频繁的对取消请求的检查将带来额外的开销，
+在快速运行中的大量搜索请求这将更加显著。
+修改这项配置只对修改完成之后启动的搜索请求生效。
 
 [float]
 [[search-concurrency-and-parallelism]]
-== Search concurrency and parallelism
+== 搜索的并发与并行
 
-By default Elasticsearch doesn't reject any search requests based on the number
-of shards the request hits. While Elasticsearch will optimize the search
-execution on the coordinating node a large number of shards can have a
-significant impact CPU and memory wise. It is usually a better idea to organize
-data in such a way that there are fewer larger shards. In case you would like to
-configure a soft limit, you can update the `action.search.shard_count.limit`
-cluster setting in order to reject search requests that hit too many shards.
+Elasticsearch 默认并不会基于请求命中的分片数量来拒绝搜索请求。
+然而 Elasticsearch 会在协调节点上对搜索的执行进行优化，大量的分片会对 CPU 以及内存占用率带来显著的影响。
+通常来说，将数据按数量较少而大小较大的分片来组织是更好的选择。
+倘若你想要配置 soft limit，可以更新 `action.search.shard_count.limit` 集群配置项来拒绝那些命中过多分片的搜索请求。
 
-The request parameter `max_concurrent_shard_requests` can be used to control the
-maximum number of concurrent shard requests the search API will execute for the
-request. This parameter should be used to protect a single request from
-overloading a cluster (e.g., a default request will hit all indices in a cluster
-which could cause shard request rejections if the number of shards per node is
-high). This default is based on the number of data nodes in the cluster but at
-most `256`.
+请求参数 `max_concurrent_shard_requests` 可以用来控制搜索 API 将对请求执行的最大分片并发请求数。
+该参数应当被用来防止单个请求过载整个集群（例如，一个默认请求将会命中集群中的所有索引，
+当节点平均分片数过高时会导致分片请求被拒绝）。
+该配置项的默认值基于集群中数据节点数量，但至多为 `256` 。
 
 --
 
