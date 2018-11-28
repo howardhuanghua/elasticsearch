@@ -3,7 +3,7 @@
 
 [partintro]
 --
-Ingest 节点用于文档被索引前的预处理操作。Ingest 节点解析 bulk 和 index 请求，做相关的数据转换之后再将文档传递给 bulk 或者 index 接口处理。
+Ingest 节点用于文档被索引前的预处理操作。Ingest 节点先解析 bulk 和 index 请求，做相关的数据转换之后再将文档传递给 bulk 或者 index 接口处理。
 
 所有的节点默认都是 ingest 节点，因此任何节点都可以处理 ingest 任务。你也可以创建专用的 ingest 节点。关闭节点的 ingest 功能，可以在 elasticsearch.yml 文件中做如下设定：
 
