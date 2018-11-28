@@ -1,16 +1,14 @@
 [[cat-recovery]]
 == cat recovery
 
-The `recovery` command is a view of index shard recoveries, both on-going and previously
-completed. It is a more compact view of the JSON <<indices-recovery,recovery>> API.
+`recovery` 命令是索引分片恢复的视图，包括正在进行和以前完成。
+它是 <<indices-recovery,recovery>> API 更加紧凑的视图。
 
-A recovery event occurs anytime an index shard moves to a different node in the cluster.
-This can happen during a snapshot recovery, a change in replication level, node failure, or
-on node startup. This last type is called a local store recovery and is the normal
-way for shards to be loaded from disk when a node starts up.
+每当索引分片移动到集群中的其他节点时，都会触发恢复事件。
+这可能发生在快照恢复，副本更改，节点故障或节点启动过程中。
+最后一种类型称为本地存储恢复，是节点启动时从磁盘加载分片的常用方式。
 
-As an example, here is what the recovery state of a cluster may look like when there
-are no shards in transit from one node to another:
+作为一个例子，这里是当从一个节点到另一个节点不存在任何碎片时集群恢复状态的样子：
 
 [source,js]
 ----------------------------------------------------------------------------
@@ -19,7 +17,7 @@ GET _cat/recovery?v
 // CONSOLE
 // TEST[setup:twitter]
 
-The response of this request will be something like:
+这个请求的响应会是这样的：
 
 [source,txt]
 ---------------------------------------------------------------------------
@@ -32,12 +30,9 @@ twitter 0     13ms store done  n/a         n/a         127.0.0.1   node-0      n
 // TESTRESPONSE[s/13ms/\\d+m?s/]
 // TESTRESPONSE[s/13/\\d+/ _cat]
 
-In the above case, the source and target nodes are the same because the recovery
-type was store, i.e. they were read from local storage on node start.
+在上述情况下，源节点和目标节点相同，因为恢复类型是 store ，即它们是在节点启动时从本地存储中读取的。
 
-Now let's see what a live recovery looks like. By increasing the replica count
-of our index and bringing another node online to host the replicas, we can see
-what a live shard recovery looks like.
+现在让我们看看现场恢复的样子。通过增加我们索引的副本数量和使另一个节点在线以承载副本，我们可以看到实时分片恢复的效果。
 
 [source,js]
 ----------------------------------------------------------------------------
@@ -46,7 +41,7 @@ GET _cat/recovery?v&h=i,s,t,ty,st,shost,thost,f,fp,b,bp
 // CONSOLE
 // TEST[setup:twitter]
 
-This will return a line like:
+这将返回以下行：
 
 [source,txt]
 ----------------------------------------------------------------------------
@@ -59,13 +54,13 @@ twitter 0 1252ms peer done  192.168.1.1 192.168.1.2 0     100.0%  0 100.0%
 // TESTRESPONSE[s/100.0%/0.0%/]
 // TESTRESPONSE[s/1252/\\d+/ _cat]
 
-We can see in the above listing that our thw twitter shard was recovered from another node.
-Notice that the recovery type is shown as `peer`. The files and bytes copied are
-real-time measurements.
+我们可以在上面的列表中看到，我们的 twitter 分片已从另一个节点恢复。
+请注意，恢复类型显示为 `peer` 。
+所复制的文件和字节都是实时测量的结果。
 
-Finally, let's see what a snapshot recovery looks like. Assuming I have previously
-made a backup of my index, I can restore it using the <<modules-snapshots,snapshot and restore>>
-API.
+最后，让我们看看快照恢复的样子。
+假设我以前做过索引的备份，
+我可以使用  <<modules-snapshots,snapshot and restore>> API 来恢复它。
 
 [source,js]
 --------------------------------------------------------------------------------
@@ -74,7 +69,7 @@ GET _cat/recovery?v&h=i,s,t,ty,st,rep,snap,f,fp,b,bp
 // CONSOLE
 // TEST[skip:no need to execute snapshot/restore here]
 
-This will show a recovery of type snapshot in the response
+这将在响应中显示恢复类型为 snapshot 。
 
 [source,txt]
 --------------------------------------------------------------------------------

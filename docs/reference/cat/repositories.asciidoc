@@ -1,8 +1,7 @@
 [[cat-repositories]]
 == cat repositories
 
-The `repositories` command shows the snapshot repositories registered in the
-cluster. For example:
+`repositories` 命令显示在集群中注册的快照存储库。例如:
 
 [source,js]
 --------------------------------------------------
@@ -11,7 +10,7 @@ GET /_cat/repositories?v
 // CONSOLE
 // TEST[s/^/PUT \/_snapshot\/repo1\n{"type": "fs", "settings": {"location": "repo\/1"}}\n/]
 
-might looks like:
+如下显示：
 
 [source,txt]
 --------------------------------------------------
@@ -21,4 +20,4 @@ repo2   s3
 --------------------------------------------------
 // TESTRESPONSE[s/\nrepo2   s3// _cat]
 
-We can quickly see which repositories are registered and their type.
+我们可以快速的查看哪些存储库已注册以及它们的类型。

@@ -1,8 +1,7 @@
 [[cat-allocation]]
 == cat allocation
 
-`allocation` provides a snapshot of how many shards are allocated to each data node
-and how much disk space they are using.
+`allocation` 提供了分配给每个数据节点的分片数量以及它们正在使用磁盘空间大小的快照。
 
 [source,js]
 --------------------------------------------------
@@ -11,7 +10,7 @@ GET /_cat/allocation?v
 // CONSOLE
 // TEST[s/^/PUT test\n{"settings": {"number_of_replicas": 0}}\n/]
 
-Might respond with:
+可能响应：
 
 [source,txt]
 --------------------------------------------------
@@ -21,5 +20,4 @@ shards disk.indices disk.used disk.avail disk.total disk.percent host      ip   
 // TESTRESPONSE[s/\d+(\.\d+)?[tgmk]?b/\\d+(\\.\\d+)?[tgmk]?b/ s/46/\\d+/]
 // TESTRESPONSE[s/CSUXak2/.+/ _cat]
 
-Here we can see that each node has been allocated a single shard and
-that they're all using about the same amount of space.
+在这里我们可以看到每个节点都被分配了一个分片和他们都使用了大约相同数量的空间。

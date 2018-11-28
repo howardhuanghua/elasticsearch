@@ -1,9 +1,8 @@
 [[cat-segments]]
 == cat segments
 
-The `segments` command provides low level information about the segments
-in the shards of an index. It provides information similar to the
-link:indices-segments.html[_segments] endpoint. For example:
+`segments` 命令提供有关索引分片中 segments 的底层信息。
+它提供了与链接类似的信息： link:indices-segments.html[_segments] 。例如：
 
 [source,js]
 --------------------------------------------------
@@ -12,7 +11,7 @@ GET /_cat/segments?v
 // CONSOLE
 // TEST[s/^/PUT \/test\/test\/1?refresh\n{"test":"test"}\nPUT \/test1\/test\/1?refresh\n{"test":"test"}\n/]
 
-might look like:
+结果如下：
 
 ["source","txt",subs="attributes,callouts"]
 --------------------------------------------------
@@ -22,52 +21,34 @@ test1 3     p      127.0.0.1 _0               0          1            0  3kb    
 --------------------------------------------------
 // TESTRESPONSE[s/3kb/\\d+(\\.\\d+)?[mk]?b/ s/2042/\\d+/ _cat]
 
-The output shows information about index names and shard numbers in the first
-two columns.
+在前两列的输出信息中展示了索引名和分片数量。
 
-If you only want to get information about segments in one particular index,
-you can add the index name in the URL, for example `/_cat/segments/test`. Also,
-several indexes can be queried like `/_cat/segments/test,test1`
+如果你只想获取某个特定索引的 segments 信息，可以在 URL 中添加索引名称，例如 `/_cat/segments/test` 。
+也可以查询多个索引如 `/_cat/segments/test,test1` 。
 
 
-The following columns provide additional monitoring information:
+以下各列提供了其他监控信息：
 
-prirep::        Whether this segment belongs to a primary or replica shard.
+prirep::        此 segment 是属于主分片还是副本分片。
 
-ip::            The ip address of the segment's shard.
+ip::            segment 所在分片的 IP 地址。
 
-segment::       A segment name, derived from the segment generation. The name
-                is internally used to generate the file names in the directory
-                of the shard this segment belongs to.
+segment::       segment 名称，从 segment 生成时创建。该名称在内部用于在该 segment 所属分片的目录中生成文件名。
 
-generation::    The generation number is incremented with each segment that is written.
-                The name of the segment is derived from this generation number.
+generation::    generation number 随着写入的每个 segment 递增。 segment 的名称来源于 generation number 。
 
-docs.count::    The number of non-deleted documents that are stored in this segment.
-                Note that these are Lucene documents, so the count will include hidden
-				documents (e.g. from nested types).
+docs.count::    此 segment 中存储的未删除文档的数量。请注意，这些是 Lucene 文档，因此计数将包含隐藏文档（例如嵌套类型）。
 
-docs.deleted::  The number of deleted documents that are stored in this segment.
-                It is perfectly fine if this number is greater than 0, space is
-                going to be reclaimed when this segment gets merged.
+docs.deleted::  存储在此分段中的已删除文档的数量。如果这个数字大于0，当这个 segment 被合并时，空间将被回收。
 
-size::          The amount of disk space that this segment uses.
+size::          此 segment 使用的磁盘空间量。
 
-size.memory::   Segments store some data into memory in order to be searchable efficiently.
-                This column shows the number of bytes in memory that are used.
+size.memory::   Segments 将一些数据存储到内存中以便高效搜索。此列显示使用的内存中的字节数。
 
-committed::     Whether the segment has been sync'ed on disk. Segments that are
-                committed would survive a hard reboot. No need to worry in case
-                of false, the data from uncommitted segments is also stored in
-                the transaction log so that Elasticsearch is able to replay
-                changes on the next start.
+committed::     segment 是否已在磁盘上同步。 segment 提交后将在硬重启后仍然存在。如果发生错误，无需担心，未提交的 segment 也会存储在事务日志中，以便 Elasticsearch 能够在下次启动时回放更改。
 
-searchable::    True if the segment is searchable. A value of false would most
-                likely mean that the segment has been written to disk but no
-                refresh occurred since then to make it searchable.
+searchable::    为 true 时 segment 可被检索。为 false 时，意味着很可能该 segment 已写入磁盘，但未发生刷新使其可搜索。
 
-version::       The version of Lucene that has been used to write this segment.
+version::       用于写入此 segment 的 Lucene 版本。
 
-compound::      Whether the segment is stored in a compound file. When true, this
-                means that Lucene merged all files from the segment in a single
-                one in order to save file descriptors.
+compound::      segment 是否存储在 compound 文件中。如果为 true ，这意味着在 compound 文件中保存 Lucene 合并 segment 中所有的文件描述符。

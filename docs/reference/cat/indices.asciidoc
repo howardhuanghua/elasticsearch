@@ -1,8 +1,7 @@
 [[cat-indices]]
 == cat indices
 
-The `indices` command provides a cross-section of each index.  This
-information *spans nodes*. For example:
+`indices` 命令提供了每个索引的片段。该信息 *跨越节点*。例如：
 
 [source,js]
 --------------------------------------------------
@@ -12,7 +11,7 @@ GET /_cat/indices/twi*?v&s=index
 // TEST[setup:huge_twitter]
 // TEST[s/^/PUT twitter2\n{"settings": {"number_of_replicas": 0}}\n/]
 
-Might respond with:
+可能响应：
 
 [source,txt]
 --------------------------------------------------
@@ -23,31 +22,27 @@ green  open   twitter2 nYFWZEO7TUiOjLQXBaYJpA   5   0          0            0   
 // TESTRESPONSE[s/\d+(\.\d+)?[tgmk]?b/\\d+(\\.\\d+)?[tgmk]?b/]
 // TESTRESPONSE[s/u8FNjxh8Rfy_awN11oDKYQ|nYFWZEO7TUiOjLQXBaYJpA/.+/ _cat]
 
-We can tell quickly how many shards make up an index, the number of
-docs, deleted docs, primary store size, and total store size (all shards including replicas).
-All these exposed metrics come directly from Lucene APIs.
+我们可以快速指定有多少分片构成索引，文档数量，删除文档数量，主分片存储空间，总存储空间（包括副本的所有分片）。
+所有这些暴露的指标都直接来自 Lucene APIs 。
 
 *Notes:*
 
-1. As the number of documents and deleted documents shown in this are at the lucene level,
-it includes all the hidden documents (e.g. from nested documents) as well.
+1. 由于此处显示的文档和已删除文档的数量均为 lucene 级别，因此它还包含所有隐藏文档（例如嵌套文档）。
 
-2. To get actual count of documents at the Elasticsearch level, the recommended way
-is to use either the <<cat-count>> or the <<search-count>>
+2. 要在 Elasticsearch 级别获得实际的文档数量，推荐的方法是使用 <<cat-count>> 或者 <<search-count>>
 
 [float]
 [[pri-flag]]
 === Primaries
 
-The index stats by default will show them for all of an index's
-shards, including replicas.  A `pri` flag can be supplied to enable
-the view of relevant stats in the context of only the primaries.
+默认情况下，索引统计信息会显示所有索引的分片，包括副本。
+提供 `pri` 参数可以在仅有主分片下启用相关统计信息的视图。
 
 [float]
 [[examples]]
 === Examples
 
-Which indices are yellow?
+哪些索引状态是 yellow ？
 
 [source,js]
 --------------------------------------------------
@@ -56,7 +51,7 @@ GET /_cat/indices?v&health=yellow
 // CONSOLE
 // TEST[continued]
 
-Which looks like:
+结果如下：
 
 [source,txt]
 --------------------------------------------------
@@ -66,7 +61,7 @@ yellow open   twitter  u8FNjxh8Rfy_awN11oDKYQ   1   1       1200            0   
 // TESTRESPONSE[s/\d+(\.\d+)?[tgmk]?b/\\d+(\\.\\d+)?[tgmk]?b/]
 // TESTRESPONSE[s/u8FNjxh8Rfy_awN11oDKYQ/.+/ _cat]
 
-Which index has the largest number of documents?
+哪个索引拥有最多的文档？
 
 [source,js]
 --------------------------------------------------
@@ -75,7 +70,7 @@ GET /_cat/indices?v&s=docs.count:desc
 // CONSOLE
 // TEST[continued]
 
-Which looks like:
+结果如下：
 
 [source,txt]
 --------------------------------------------------
@@ -86,7 +81,7 @@ green  open   twitter2 nYFWZEO7TUiOjLQXBaYJpA   5   0          0            0   
 // TESTRESPONSE[s/\d+(\.\d+)?[tgmk]?b/\\d+(\\.\\d+)?[tgmk]?b/]
 // TESTRESPONSE[s/u8FNjxh8Rfy_awN11oDKYQ|nYFWZEO7TUiOjLQXBaYJpA/.+/ _cat]
 
-How many merge operations have the shards for the `twitter` completed?
+有多少 `twitter` 索引的分片完成了合并操作？
 
 [source,js]
 --------------------------------------------------
@@ -95,7 +90,7 @@ GET /_cat/indices/twitter?pri&v&h=health,index,pri,rep,docs.count,mt
 // CONSOLE
 // TEST[continued]
 
-Might look like:
+结果如下：
 
 [source,txt]
 --------------------------------------------------
@@ -104,7 +99,7 @@ yellow twitter   1   1 1200       16     16
 --------------------------------------------------
 // TESTRESPONSE[s/16/\\d+/ _cat]
 
-How much memory is used per index?
+每个索引使用多少内存？
 
 [source,js]
 --------------------------------------------------
@@ -113,7 +108,7 @@ GET /_cat/indices?v&h=i,tm&s=tm:desc
 // CONSOLE
 // TEST[continued]
 
-Might look like:
+结果如下：
 
 [source,txt]
 --------------------------------------------------

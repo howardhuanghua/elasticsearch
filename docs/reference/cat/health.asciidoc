@@ -1,8 +1,7 @@
 [[cat-health]]
 == cat health
 
-`health` is a terse, one-line representation of the same information
-from `/_cluster/health`.
+`health` 是来自 `/_cluster/health` 的相同信息的简洁表达。
 
 [source,js]
 --------------------------------------------------
@@ -19,7 +18,7 @@ epoch      timestamp cluster       status node.total node.data shards pri relo i
 // TESTRESPONSE[s/1475871424 16:17:04/\\d+ \\d+:\\d+:\\d+/]
 // TESTRESPONSE[s/elasticsearch/[^ ]+/ s/0                  -/\\d+ (-|\\d+(\\.\\d+)?[ms]+)/ _cat]
 
-It has one option `ts` to disable the timestamping:
+它有一个选项 `ts` 来禁用时间戳：
 
 [source,js]
 --------------------------------------------------
@@ -28,7 +27,7 @@ GET /_cat/health?v&ts=false
 // CONSOLE
 // TEST[s/^/PUT twitter\n{"settings":{"number_of_replicas": 0}}\n/]
 
-which looks like:
+结果如下：
 
 [source,txt]
 --------------------------------------------------
@@ -37,8 +36,7 @@ elasticsearch green           1         1      5   5    0    0        0         
 --------------------------------------------------
 // TESTRESPONSE[s/elasticsearch/[^ ]+/ s/0                  -/\\d+ (-|\\d+(\\.\\d+)?[ms]+)/ _cat]
 
-A common use of this command is to verify the health is consistent
-across nodes:
+此命令一个常见的用途是验证节点的运行状况是否一致：
 
 [source,sh]
 --------------------------------------------------
@@ -52,10 +50,9 @@ across nodes:
 --------------------------------------------------
 // NOTCONSOLE
 
-A less obvious use is to track recovery of a large cluster over
-time. With enough shards, starting a cluster, or even recovering after
-losing a node, can take time (depending on your network & disk). A way
-to track its progress is by using this command in a delayed loop:
+一种少见的用途是随着时间追踪大型集群的恢复。
+有了足够的碎片后，在启动集群，甚至在丢失节点后恢复，需要耗费时间（取决于你的网络和磁盘）。
+跟踪其进度的一种方法是在延迟循环中使用此命令：
 
 [source,sh]
 --------------------------------------------------
@@ -68,19 +65,17 @@ to track its progress is by using this command in a delayed loop:
 --------------------------------------------------
 // NOTCONSOLE
 
-In this scenario, we can tell that recovery took roughly four minutes.
-If this were going on for hours, we would be able to watch the
-`UNASSIGNED` shards drop precipitously.  If that number remained
-static, we would have an idea that there is a problem.
+在这种情况下，我们可以看出恢复需要大约四分钟的时间。
+如果这种情况持续数小时，我们将能够看到 `UNASSIGNED` 碎片急剧下降。
+如果这个数字保持不变，我们则会认为这是一个问题。
 
 [float]
 [[timestamp]]
 === Why the timestamp?
 
-You typically are using the `health` command when a cluster is
-malfunctioning.  During this period, it's extremely important to
-correlate activities across log files, alerting systems, etc.
+当集群发生故障时，你通常使用 `health` 命令。
+在此期间，关联活动的访问日志文件，系统报警等非常重要。
 
-There are two outputs.  The `HH:MM:SS` output is simply for quick
-human consumption.  The epoch time retains more information, including
-date, and is machine sortable if your recovery spans days.
+这里有两个输出：
+ `HH:MM:SS` 输出是简单的，方便人们识别。
+ epoch 时间保留更多信息，包括日期，如果你的恢复时间跨度在几天内，则可以通过机器进行排序。

@@ -1,8 +1,7 @@
 [[cat-master]]
 == cat master
 
-`master` doesn't have any extra options. It simply displays the
-master's node ID, bound IP address, and node name. For example:
+`master` 没有任何额外的参数。 它只是简单的显示主节点 ID ，绑定的 IP 地址和节点名称。 例如：
 
 [source,js]
 --------------------------------------------------
@@ -10,7 +9,7 @@ GET /_cat/master?v
 --------------------------------------------------
 // CONSOLE
 
-might respond:
+可能响应：
 
 [source,txt]
 --------------------------------------------------
@@ -19,9 +18,8 @@ YzWoH_2BT-6UjVGDyPdqYg 127.0.0.1 127.0.0.1 YzWoH_2
 --------------------------------------------------
 // TESTRESPONSE[s/YzWoH_2.+/.+/ _cat]
 
-This information is also available via the `nodes` command, but this
-is slightly shorter when all you want to do, for example, is verify
-all nodes agree on the master:
+这些信息也可以通过 `nodes` 命令获得，但是当你执行时这会更加简短，
+例如，验证所有节点上的主节点是否一致：
 
 [source,sh]
 --------------------------------------------------

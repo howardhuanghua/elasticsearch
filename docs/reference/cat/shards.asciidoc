@@ -1,11 +1,9 @@
 [[cat-shards]]
 == cat shards
 
-The `shards` command is the detailed view of what nodes contain which
-shards.  It will tell you if it's a primary or replica, the number of
-docs, the bytes it takes on disk, and the node where it's located.
+`shards` 命令是哪些节点包含哪些分片的详细视图。它将会告诉你，是否是主分片或是副本，文档数量，磁盘上的字节数以及它所在的节点。
 
-Here we see a single index, with one primary shard and no replicas:
+在这里，我们看到一个索引，其中包含一个主碎片，没有副本：
 
 [source,js]
 ---------------------------------------------------------------------------
@@ -14,7 +12,7 @@ GET _cat/shards
 // CONSOLE
 // TEST[setup:twitter]
 
-This will return
+这将返回
 
 [source,txt]
 ---------------------------------------------------------------------------
@@ -29,9 +27,8 @@ twitter 0 p STARTED 3014 31.1mb 192.168.56.10 H5dfFeA
 [[index-pattern]]
 === Index pattern
 
-If you have many shards, you may wish to limit which indices show up
-in the output.  You can always do this with `grep`, but you can save
-some bandwidth by supplying an index pattern to the end.
+如果你有许多分片，你希望限制输出中显示的索引。
+你总是可以用 `grep` 来做到这一点，但是你可以通过提供索引模式来节省一些带宽。
 
 [source,js]
 ---------------------------------------------------------------------------
@@ -40,7 +37,7 @@ GET _cat/shards/twitt*
 // CONSOLE
 // TEST[setup:twitter]
 
-Which will return the following
+这将返回以下内容
 
 [source,txt]
 ---------------------------------------------------------------------------
@@ -56,8 +53,8 @@ twitter 0 p STARTED 3014 31.1mb 192.168.56.10 H5dfFeA
 [[relocation]]
 === Relocation
 
-Let's say you've checked your health and you see a relocating
-shards.  Where are they from and where are they going?
+假设你检查了集群的健康状况，并且看到了重新分配中的分片。
+他们从哪里来，他们去哪里？
 
 [source,js]
 ---------------------------------------------------------------------------
@@ -66,7 +63,7 @@ GET _cat/shards
 // CONSOLE
 // TEST[skip:for now, relocation cannot be recreated]
 
-A relocating shard will be shown as follows
+重新移动的分片将显示如下
 
 [source,txt]
 ---------------------------------------------------------------------------
@@ -78,8 +75,7 @@ twitter 0 p RELOCATING 3014 31.1mb 192.168.56.10 H5dfFeA -> -> 192.168.56.30 bGG
 [[states]]
 === Shard states
 
-Before a shard can be used, it goes through an `INITIALIZING` state.
-`shards` can show you which ones.
+在使用分片之前，它会经历一个 `INITIALIZING` 状态。 `shards` 可以告诉你是哪一个。
 
 [source,js]
 ---------------------------------------------------------------------------
@@ -88,7 +84,7 @@ GET _cat/shards
 // CONSOLE
 // TEST[skip:there is no guarantee to test for shards in initializing state]
 
-You can get the initializing state in the response like this
+你可以像这样在响应中获得初始化状态
 
 [source,txt]
 ---------------------------------------------------------------------------
@@ -97,11 +93,10 @@ twitter 0 r INITIALIZING    0 14.3mb 192.168.56.30 bGG90GE
 ---------------------------------------------------------------------------
 // TESTRESPONSE[_cat]
 
-If a shard cannot be assigned, for example you've overallocated the
-number of replicas for the number of nodes in the cluster, the shard
-will remain `UNASSIGNED` with the <<reason-unassigned,reason code>> `ALLOCATION_FAILED`.
+如果无法分配分片，例如，你已经为集群中分配的副本数量超过了节点数量，
+那么分片将保持 `UNASSIGNED` 因为 <<reason-unassigned,reason code>> `ALLOCATION_FAILED` 。
 
-You can use the shards API to find out that reason.
+你可以使用 shards API 找出原因。
 
 [source,js]
 ---------------------------------------------------------------------------
@@ -110,7 +105,7 @@ GET _cat/shards?h=index,shard,prirep,state,unassigned.reason
 // CONSOLE
 // TEST[skip:for now]
 
-The reason for an unassigned shard will be listed as the last field
+未分配分片的原因将被列于最后一个字段
 
 [source,txt]
 ---------------------------------------------------------------------------
@@ -125,18 +120,18 @@ twitter 0 r UNASSIGNED ALLOCATION_FAILED
 [[reason-unassigned]]
 === Reasons for unassigned shard
 
-These are the possible reasons for a shard to be in a unassigned state:
+这些可能是分片处于未分配状态的原因：
 
 [horizontal]
-`INDEX_CREATED`::           Unassigned as a result of an API creation of an index.
-`CLUSTER_RECOVERED`::       Unassigned as a result of a full cluster recovery.
-`INDEX_REOPENED`::          Unassigned as a result of opening a closed index.
-`DANGLING_INDEX_IMPORTED`:: Unassigned as a result of importing a dangling index.
-`NEW_INDEX_RESTORED`::      Unassigned as a result of restoring into a new index.
-`EXISTING_INDEX_RESTORED`:: Unassigned as a result of restoring into a closed index.
-`REPLICA_ADDED`::           Unassigned as a result of explicit addition of a replica.
-`ALLOCATION_FAILED`::       Unassigned as a result of a failed allocation of the shard.
-`NODE_LEFT`::               Unassigned as a result of the node hosting it leaving the cluster.
-`REROUTE_CANCELLED`::       Unassigned as a result of explicit cancel reroute command.
-`REINITIALIZED`::           When a shard moves from started back to initializing, for example, with shadow replicas.
-`REALLOCATED_REPLICA`::     A better replica location is identified and causes the existing replica allocation to be cancelled.
+`INDEX_CREATED`::           由于创建索引的 API 而未分配。
+`CLUSTER_RECOVERED`::       由于整个集群恢复而未分配。
+`INDEX_REOPENED`::          由于打开已关闭索引而未分配。
+`DANGLING_INDEX_IMPORTED`:: 由于导入到 dangling index 而未分配。
+`NEW_INDEX_RESTORED`::      由于恢复到新索引而未分配。
+`EXISTING_INDEX_RESTORED`:: 由于恢复到已关闭的索引而未分配。
+`REPLICA_ADDED`::           由于明确添加副本而未分配。
+`ALLOCATION_FAILED`::       由于分片分配失败而未分配。
+`NODE_LEFT`::               由于承载它的节点离开集群而未分配。
+`REROUTE_CANCELLED`::       由于显式取消 reroute 命令而未分配。
+`REINITIALIZED`::           当分片从开始移动回到初始化时，例如，使用 shadow replicas 。
+`REALLOCATED_REPLICA`::     确定更好的副本位置并使现有的副本分配被取消。

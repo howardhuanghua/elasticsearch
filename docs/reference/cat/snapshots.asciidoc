@@ -1,9 +1,9 @@
 [[cat-snapshots]]
 == cat snapshots
 
-The `snapshots` command shows all snapshots that belong to a specific repository.
-To find a list of available repositories to query, the command `/_cat/repositories` can be used.
-Querying the snapshots of a repository named `repo1` then looks as follows.
+`snapshots` 命令显示特定存储库的所有快照。
+要查找可用存储库列表，可以使用命令 `/ _cat / repositories` 。
+查询名为 `repo1` 的存储库快照如下所示。
 
 [source,js]
 --------------------------------------------------
@@ -14,7 +14,7 @@ GET /_cat/snapshots/repo1?v&s=id
 // TEST[s/^/PUT \/_snapshot\/repo1\/snap2?wait_for_completion=true\n/]
 // TEST[s/^/PUT \/_snapshot\/repo1\n{"type": "fs", "settings": {"location": "repo\/1"}}\n/]
 
-Which looks like:
+如下显示
 
 [source,txt]
 --------------------------------------------------
@@ -28,7 +28,6 @@ snap2 SUCCESS 1445634298  23:04:58   1445634672 23:11:12     6.2m       2       
 // TESTRESPONSE[s/2                10             0           10/\\d+ \\d+ \\d+ \\d+/]
 // TESTRESPONSE[_cat]
 
-Each snapshot contains information about when it was started and stopped.
-Start and stop timestamps are available in two formats.
-The `HH:MM:SS` output is simply for quick human consumption.
-The epoch time retains more information, including date, and is machine sortable if the snapshot process spans days.
+每个快照都包含有关何时启动和停止的信息。
+开始和停止时间戳有两种格式。
+输出 `HH:MM:SS` 方便人们快速识别。 epoch time 则保留更多信息，包括日期，并且如果快照跨越了几天，则可以进行机器排序。

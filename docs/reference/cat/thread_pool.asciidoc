@@ -1,8 +1,8 @@
 [[cat-thread-pool]]
 == cat thread pool
 
-The `thread_pool` command shows cluster wide thread pool statistics per node. By default the active, queue and rejected
-statistics are returned for all thread pools.
+`thread_pool` 命令显示每个节点的集群线程池统计信息。
+默认情况下，所有线程池均返回活动队列和队列拒绝统计信息。
 
 [source,js]
 --------------------------------------------------
@@ -10,7 +10,7 @@ GET /_cat/thread_pool
 --------------------------------------------------
 // CONSOLE
 
-Which looks like:
+如下显示：
 
 [source,txt]
 --------------------------------------------------
@@ -33,7 +33,7 @@ node-0 write               0 0 0
 //    know how many there will be and we just want to assert that there are
 //    numbers in the response, not *which* numbers are there.
 
-The first column is the node name
+第一列为节点名称
 
 [source,txt]
 --------------------------------------------------
@@ -41,7 +41,7 @@ node_name
 node-0
 --------------------------------------------------
 
-The second column is the thread pool name
+第二列为线程池名称
 [source,txt]
 --------------------------------------------------
 name
@@ -70,7 +70,7 @@ write
 --------------------------------------------------
 
 
-The next three columns show the active, queue, and rejected statistics for each thread pool
+接下来的三列显示每个线程池的 active ， queue 和 rejected 统计信息。
 
 [source,txt]
 --------------------------------------------------
@@ -92,8 +92,8 @@ active queue rejected
      0     0        0
 --------------------------------------------------
 
-The cat thread pool API accepts a `thread_pool_patterns` URL parameter for specifying a
-comma-separated list of regular expressions to match thread pool names.
+cat thread pool API 接受一个逗号分隔的常用表达式列表为 `thread_pool_patterns` URL 参数，
+以匹配线程池名称。
 
 [source,js]
 --------------------------------------------------
@@ -101,7 +101,7 @@ GET /_cat/thread_pool/generic?v&h=id,name,active,rejected,completed
 --------------------------------------------------
 // CONSOLE
 
-which looks like:
+如下显示：
 
 [source,txt]
 --------------------------------------------------
@@ -110,45 +110,43 @@ id                     name    active rejected completed
 --------------------------------------------------
 // TESTRESPONSE[s/0EWUhXeBQtaVGlexUeVwMg/[\\w-]+/ s/\d+/\\d+/ _cat]
 
-Here the host columns and the active, rejected and completed suggest thread pool statistics are displayed.
+这里建议显示 thread pool 主机列和 active ， rejected ， completed 的统计信息。
 
-All <<modules-threadpool,built-in thread pools>> and custom thread pools are available.
+所有 <<modules-threadpool,built-in thread pools>> 和自定义的线程池都可用。
 [float]
 ==== Thread Pool Fields
 
-For each thread pool, you can load details about it by using the field names
-in the table below.
+对于每个线程池，可以使用下表中的字段名称加载关于它的详细信息。
 
 [cols="<,<,<",options="header"]
 |=======================================================================
 |Field Name |Alias |Description
-|`type` |`t` |The current (*) type of thread pool (`fixed` or `scaling`)
-|`active` |`a` |The number of active threads in the current thread pool
-|`size` |`s` |The number of threads in the current thread pool
-|`queue` |`q` |The number of tasks in the queue for the current thread pool
-|`queue_size` |`qs` |The maximum number of tasks permitted in the queue for the current thread pool
-|`rejected` |`r` |The number of tasks rejected by the thread pool executor
-|`largest` |`l` |The highest number of active threads in the current thread pool
-|`completed` |`c` |The number of tasks completed by the thread pool executor
-|`min` |`mi` |The configured minimum number of active threads allowed in the current thread pool
-|`max` |`ma` |The configured maximum number of active threads allowed in the current thread pool
-|`keep_alive` |`k` |The configured keep alive time for threads
+|`type` |`t` |线程池的当前类型 ， (`fixed` 或者 `scaling`)
+|`active` |`a` |当前线程池中活动线程的数量
+|`size` |`s` |当前线程池中的线程数
+|`queue` |`q` |当前线程池的队列中的任务数
+|`queue_size` |`qs` |当前线程池的队列中允许的最大任务数
+|`rejected` |`r` |线程池执行程序被拒绝的任务数
+|`largest` |`l` |当前线程池中活动线程的最大数量
+|`completed` |`c` |线程池执行器已经完成的任务数
+|`min` |`mi` |当前线程池中允许的最小活动线程数
+|`max` |`ma` |当前线程池中允许的最大活动线程数
+|`keep_alive` |`k` |为线程配置保持活动时间
 |=======================================================================
 
 [float]
 === Other Fields
 
-In addition to details about each thread pool, it is also convenient to get an
-understanding of where those thread pools reside. As such, you can request
-other details like the `ip` of the responding node(s).
+除了每个线程池的详细信息之外，了解线程池驻留的位置也很方便。
+因此，你可以请求其他详细信息，例如响应节点的 `ip` 。
 
 [cols="<,<,<",options="header"]
 |=======================================================================
 |Field Name |Alias |Description
-|`node_id` |`id` |The unique node ID
-|`ephemeral_id`|`eid` |The ephemeral node ID
-|`pid` |`p` |The process ID of the running node
-|`host` |`h` |The hostname for the current node
-|`ip` |`i` |The IP address for the current node
-|`port` |`po` |The bound transport port for the current node
+|`node_id` |`id` |唯一的节点 ID
+|`ephemeral_id`|`eid` |短暂的节点 ID
+|`pid` |`p` |正在运行节点的进程 ID
+|`host` |`h` |当前节点的主机名
+|`ip` |`i` |当前节点的 IP 地址
+|`port` |`po` |当前节点绑定的传输端口
 |=======================================================================

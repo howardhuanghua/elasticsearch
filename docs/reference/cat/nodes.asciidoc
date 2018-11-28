@@ -1,7 +1,7 @@
 [[cat-nodes]]
 == cat nodes
 
-The `nodes` command shows the cluster topology. For example
+`nodes` 命令显示集群拓扑。 例如
 
 [source,js]
 --------------------------------------------------
@@ -9,7 +9,7 @@ GET /_cat/nodes?v
 --------------------------------------------------
 // CONSOLE
 
-Might look like:
+如下显示：
 
 [source,txt]
 --------------------------------------------------
@@ -20,35 +20,29 @@ ip        heap.percent ram.percent cpu load_1m load_5m load_15m node.role master
 // TESTRESPONSE[s/65          99  42/\\d+ \\d+ \\d+/]
 // TESTRESPONSE[s/[*]/[*]/ s/mJw06l1/.+/ _cat]
 
-The first few columns (`ip`, `heap.percent`, `ram.percent`, `cpu`, `load_*`) tell
-you where your nodes live and give a quick picture of performance stats.
+前几列（ `ip`, `heap.percent`, `ram.percent`, `cpu`, `load_*` ）告诉你节点在哪里，以便快速了解性能统计信息。
 
-The last (`node.role`, `master`, and `name`) columns provide ancillary
-information that can often be useful when looking at the cluster as a whole,
-particularly large ones.  How many master-eligible nodes do I have?
+最后几列（ `node.role` ， `master` 和 `name` ）提供了辅助信息，这在查看整个集群时通常很有用，特别是大型集群。
+我有多少个 master-eligible 节点？
 
-The `nodes` API accepts an additional URL parameter `full_id` accepting `true`
-or `false`. The purpose of this parameter is to format the ID field (if
-requested with `id` or `nodeId`) in its full length or in abbreviated form (the
-default).
+`nodes` API 承认一个额外的 URL 参数 `full_id` ，接受 `true` 或者 `false`。
+此参数的目的是以全长或缩写形式（默认）格式化 ID 字段（如果请求了 `id` 或 `nodeId` ）。
 
 [float]
 === Columns
 
-Below is an exhaustive list of the existing headers that can be
-passed to `nodes?h=` to retrieve the relevant details in ordered
-columns.  If no headers are specified, then those marked to Appear
-by Default will appear. If any header is specified, then the defaults
-are not used.
+以下是现有标题的详尽列表可以传递给 `nodes?h=` ，以便检索有序列中的相关详细信息。
+如果未指定标题，则会显示标记为默认显示的标题。
+如果指定了任何标题，则不使用默认值。
 
-Aliases can be used in place of the full header name for brevity.
-Columns appear in the order that they are listed below unless a
-different order is specified (e.g., `h=pid,id` versus `h=id,pid`).
+为了简洁，别名可以用来代替完整的标题名称。
+除非指定了不同的顺序（例如， `h=pid,id` versus `h=id,pid` ），
+否则列按照下面列出的顺序出现。
 
-When specifying headers, the headers are not placed in the output
-by default.  To have the headers appear in the output, use verbose
-mode (`v`). The header name will match the supplied value (e.g.,
-`pid` versus `p`).  For example:
+指定标题时，默认情况下标题不会放在输出中。
+要在输出中显示标题，请使用详细模式（ `v` ）。
+标题名称将与提供的值匹配（例如， `pid` 与 `p` ）。
+例如：
 
 [source,js]
 --------------------------------------------------

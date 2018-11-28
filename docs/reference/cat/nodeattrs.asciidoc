@@ -1,8 +1,8 @@
 [[cat-nodeattrs]]
 == cat nodeattrs
 
-The `nodeattrs` command shows custom node attributes.
-For example:
+`nodeattrs` 命令显示自定义节点属性。
+例如：
 
 [source,js]
 --------------------------------------------------
@@ -12,7 +12,7 @@ GET /_cat/nodeattrs?v
 // TEST[s/\?v/\?v&s=node,attr/]
 // Sort the resulting attributes so we can assert on them more easilly
 
-Could look like:
+如下显示：
 
 [source,txt]
 --------------------------------------------------
@@ -27,27 +27,23 @@ node-0 127.0.0.1 127.0.0.1 testattr test
 // If xpack is installed then the first ... contains ml attributes
 // and the second contains xpack.installed=true
 
-The first few columns (`node`, `host`, `ip`) give you basic info per node
-and the `attr` and `value` columns give you the custom node attributes,
-one per line.
+前几列（ `node` ， `host` ， `ip` ）为你提供每个节点的基本信息 `attr` 和 `value` 提供节点自定义属性，每行一个。
 
 [float]
 === Columns
 
-Below is an exhaustive list of the existing headers that can be
-passed to `nodeattrs?h=` to retrieve the relevant details in ordered
-columns.  If no headers are specified, then those marked to Appear
-by Default will appear. If any header is specified, then the defaults
-are not used.
+以下是现有标题的详尽列表可以传递给 `nodeattrs?h=` ，以便检索有序列中的相关详细信息。
+如果未指定标题，则会显示标记为默认显示的标题。
+如果指定了任何标题，则不使用默认值。
 
-Aliases can be used in place of the full header name for brevity.
-Columns appear in the order that they are listed below unless a
-different order is specified (e.g., `h=attr,value` versus `h=value,attr`).
+为了简洁，别名可以用来代替完整的标题名称。
+除非指定了不同的顺序（例如，`h=attr,value` versus `h=value,attr` ），
+否则列按照下面列出的顺序出现。
 
-When specifying headers, the headers are not placed in the output
-by default.  To have the headers appear in the output, use verbose
-mode (`v`). The header name will match the supplied value (e.g.,
-`pid` versus `p`).  For example:
+指定标题时，默认情况下标题不会放在输出中。
+要在输出中显示标题，请使用详细模式（ `v` ）。
+标题名称将与提供的值匹配（例如， `pid` 与 `p` ）。
+例如：
 
 [source,js]
 --------------------------------------------------
@@ -57,7 +53,7 @@ GET /_cat/nodeattrs?v&h=name,pid,attr,value
 // TEST[s/,value/,value&s=node,attr/]
 // Sort the resulting attributes so we can assert on them more easilly
 
-Might look like:
+显示如下：
 
 [source,txt]
 --------------------------------------------------
