@@ -12,7 +12,7 @@ Ingest 节点用于文档被索引前的预处理操作。Ingest 节点先解析
 node.ingest: false
 --------------------------------------------------
 
-在索引数据之前预处理文档，<<pipeline, 定义管道>>章节中定义了一系列的 <<ingest-processors, 处理器>>。每个处理器可以按照一定的方式转换文档。例如，一个管道可以有一个处理器删除文档中的某个字段，紧接着有一个处理器修改一个字段的名称。<<cluster-state, 集群元数据>>会保存所有配置好的管道信息。 
+在索引数据之前预处理文档，<<pipeline, 管道定义>>章节中定义了一系列的<<ingest-processors, 处理器>>。每个处理器可以按照一定的方式转换文档。例如，一个管道可以有一个处理器删除文档中的某个字段，紧接着有一个处理器修改一个字段的名称。<<cluster-state, 集群元数据>>会保存所有配置好的管道信息。 
 
 使用管道时，可以简单的在 index 或者 bulk 请求中指定 `pipeline` 参数。这样 ingest 节点才知道使用哪一个管道。例如：
 
@@ -26,7 +26,7 @@ PUT my-index/_doc/my-id?pipeline=my_pipeline_id
 // CONSOLE
 // TEST[catch:bad_request]
 
-一个索引如果定义了 <<dynamic-index-settings, 默认管道>>，在 `pipeline` 参数没有指定时将会被使用。
+一个索引如果定义了<<dynamic-index-settings, 默认管道>>，在 `pipeline` 参数没有指定时将会被使用。
 
 查看 <<ingest-apis,Ingest 接口文档>>获取更多关于创建、添加和删除管道的信息。
 

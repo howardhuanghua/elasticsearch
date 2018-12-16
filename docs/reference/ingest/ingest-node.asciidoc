@@ -1,9 +1,7 @@
 [[pipeline]]
-== Pipeline Definition
+== 管道定义
 
-A pipeline is a definition of  a series of <<ingest-processors, processors>> that are to be executed
-in the same order as they are declared. A pipeline consists of two main fields: a `description`
-and a list of `processors`:
+管道是由一系列的<<ingest-processors, 处理器>>组成的，它们会被按照其定义顺序执行。一个管道有两个主要的字段组成： `description` 和一个 `processors` 列表：
 
 [source,js]
 --------------------------------------------------
@@ -14,26 +12,24 @@ and a list of `processors`:
 --------------------------------------------------
 // NOTCONSOLE
 
-The `description` is a special field to store a helpful description of
-what the pipeline does.
+`description` 是一个特殊的字段，用于存储该管道的描述信息。
 
-The `processors` parameter defines a list of processors to be executed in
-order.
+`processors` 参数定义了一个有序的处理器列表。
 
 [[ingest-apis]]
-== Ingest APIs
+== Ingest 接口
 
-The following ingest APIs are available for managing pipelines:
+下面的 ingest 接口用于管理管道：
 
-* <<put-pipeline-api>> to add or update a pipeline
-* <<get-pipeline-api>> to return a specific pipeline
-* <<delete-pipeline-api>> to delete a pipeline
-* <<simulate-pipeline-api>> to simulate a call to a pipeline
+* <<put-pipeline-api>> 添加或更新管道
+* <<get-pipeline-api>> 返回指定的管道
+* <<delete-pipeline-api>> 删除一个管道
+* <<simulate-pipeline-api>> 模拟一个管道调用
 
 [[put-pipeline-api]]
-=== Put Pipeline API
+=== 创建管道接口
 
-The put pipeline API adds pipelines and updates existing pipelines in the cluster.
+创建管道接口添加或者更新一个集群中已存在的管道。
 
 [source,js]
 --------------------------------------------------
@@ -52,13 +48,12 @@ PUT _ingest/pipeline/my-pipeline-id
 --------------------------------------------------
 // CONSOLE
 
-NOTE: The put pipeline API also instructs all ingest nodes to reload their in-memory representation of pipelines, so that
-      pipeline changes take effect immediately.
+NOTE: 创建管道接口会通知所有 ingest 节点重新加载内存中管道，因此管道更新会立即生效。
 
 [[get-pipeline-api]]
-=== Get Pipeline API
+=== 获取管道接口
 
-The get pipeline API returns pipelines based on ID. This API always returns a local reference of the pipeline.
+获取管道接口根据指定的 ID 返回对应的管道信息，这个接口始终返回一个管道的本地引用。
 
 [source,js]
 --------------------------------------------------
@@ -67,7 +62,7 @@ GET _ingest/pipeline/my-pipeline-id
 // CONSOLE
 // TEST[continued]
 
-Example response:
+响应示例：
 
 [source,js]
 --------------------------------------------------
@@ -87,19 +82,13 @@ Example response:
 --------------------------------------------------
 // TESTRESPONSE
 
-For each returned pipeline, the source and the version are returned.
-The version is useful for knowing which version of the pipeline the node has.
-You can specify multiple IDs to return more than one pipeline. Wildcards are also supported.
+每个返回的管道都包含配置和版本信息。版本用于区分不同的管道，你可以指定多个 ID 同时返回多个管道，星号模糊匹配也是支持的。
 
 [float]
 [[versioning-pipelines]]
-==== Pipeline Versioning
+==== 指定管道版本
 
-Pipelines can optionally add a `version` number, which can be any integer value,
-in order to simplify pipeline management by external systems. The `version`
-field is completely optional and it is meant solely for external management of
-pipelines. To unset a `version`, simply replace the pipeline without specifying
-one.
+管道可以选择性的添加数值类型的版本号（ `version` 字段），这样便于外部系统更好的管理。 `version` 字段完全是可选的，且对外部管理系统来说是唯一的。如果想取消 `version` 字段的设定，可以简单的替换对应的管道而不指定该字段即可。
 
 [source,js]
 --------------------------------------------------
@@ -119,9 +108,7 @@ PUT _ingest/pipeline/my-pipeline-id
 --------------------------------------------------
 // CONSOLE
 
-To check for the `version`, you can
-<<common-options-response-filtering, filter responses>>
-using `filter_path` to limit the response to just the `version`:
+为了检查指定的版本，可以<<common-options-response-filtering, 过滤响应内容>>，使用 `filter_path` 关键字限制响应的内容只返回指定的版本。
 
 [source,js]
 --------------------------------------------------
@@ -130,7 +117,7 @@ GET /_ingest/pipeline/my-pipeline-id?filter_path=*.version
 // CONSOLE
 // TEST[continued]
 
-This should give a small response that makes it both easy and inexpensive to parse:
+如下示例返回了一个简洁的响应内容，便于解析：
 
 [source,js]
 --------------------------------------------------
@@ -143,9 +130,9 @@ This should give a small response that makes it both easy and inexpensive to par
 // TESTRESPONSE
 
 [[delete-pipeline-api]]
-=== Delete Pipeline API
+=== 删除管道接口
 
-The delete pipeline API deletes pipelines by ID or wildcard match (`my-*`, `*`).
+删除管道接口指定 ID 删除对应的管道，可以使用通配符（ `my-*`, `*` ）。
 
 [source,js]
 --------------------------------------------------
@@ -185,17 +172,13 @@ Hidden expected response:
 ////
 
 [[simulate-pipeline-api]]
-=== Simulate Pipeline API
+=== 模拟管道接口
 
-The simulate pipeline API executes a specific pipeline against
-the set of documents provided in the body of the request.
+模拟管道接口执行一个指定的管道并在请求体中携带一个文档的集合。
 
-You can either specify an existing pipeline to execute
-against the provided documents, or supply a pipeline definition in
-the body of the request.
+模拟时，你可以指定一个已存在的管道或者在请求体重定义一个新的管道。
 
-Here is the structure of a simulate request with a pipeline definition provided
-in the body of the request:
+如下是一个在请求体中指定新的管道内容模拟管道的示例请求：
 
 [source,js]
 --------------------------------------------------
@@ -213,7 +196,7 @@ POST _ingest/pipeline/_simulate
 --------------------------------------------------
 // NOTCONSOLE
 
-Here is the structure of a simulate request against an existing pipeline:
+如下是一个模拟已存在管道的请求结构：
 
 [source,js]
 --------------------------------------------------
@@ -228,8 +211,7 @@ POST _ingest/pipeline/my-pipeline-id/_simulate
 --------------------------------------------------
 // NOTCONSOLE
 
-Here is an example of a simulate request with a pipeline defined in the request
-and its response:
+如下是一个模拟自定义管道请求的响应内容：
 
 [source,js]
 --------------------------------------------------
@@ -269,7 +251,7 @@ POST _ingest/pipeline/_simulate
 --------------------------------------------------
 // CONSOLE
 
-Response:
+响应内容：
 
 [source,js]
 --------------------------------------------------
@@ -310,13 +292,8 @@ Response:
 // TESTRESPONSE[s/"2017-05-04T22:30:03.188Z"/$body.docs.1.doc._ingest.timestamp/]
 
 [[ingest-verbose-param]]
-==== Viewing Verbose Results
-You can use the simulate pipeline API to see how each processor affects the ingest document
-as it passes through the pipeline. To see the intermediate results of
-each processor in the simulate request, you can add the `verbose` parameter
-to the request.
-
-Here is an example of a verbose request and its response:
+==== 查看详细的结果
+你可以利用模拟管道接口查看每个处理器是如何处理每个流过的文档的。如果想查看每个处理器的中间结果，可以在请求中添加 `verbose` 参数。 如下是一个携带 `verbose` 参数的请求，返回详细信息的例子：
 
 [source,js]
 --------------------------------------------------
@@ -362,7 +339,7 @@ POST _ingest/pipeline/_simulate?verbose
 --------------------------------------------------
 // CONSOLE
 
-Response:
+响应内容：
 
 [source,js]
 --------------------------------------------------
@@ -443,16 +420,13 @@ Response:
 // TESTRESPONSE[s/"2017-05-04T22:46:09.677Z"/$body.docs.1.processor_results.1.doc._ingest.timestamp/]
 
 [[accessing-data-in-pipelines]]
-== Accessing Data in Pipelines
-
-The processors in a pipeline have read and write access to documents that pass through the pipeline.
-The processors can access fields in the source of a document and the document's metadata fields.
+== 访问管道中的数据
+管道中的处理器可以读写流过管道的文档，处理器可以访问文档中具体的字段，以及文档的元数据。
 
 [float]
 [[accessing-source-fields]]
-=== Accessing Fields in the Source
-Accessing a field in the source is straightforward. You simply refer to fields by
-their name. For example:
+=== 访问字段原始值
+从 source 中访问字段原始值非常简单，你可以简单的指定字段的名称即可。例如：
 
 [source,js]
 --------------------------------------------------
@@ -465,7 +439,7 @@ their name. For example:
 --------------------------------------------------
 // NOTCONSOLE
 
-On top of this, fields from the source are always accessible via the `_source` prefix:
+上面的例子中，也可以直接加上 `_source` 前缀关键字进行访问，例如：
 
 [source,js]
 --------------------------------------------------
@@ -480,12 +454,8 @@ On top of this, fields from the source are always accessible via the `_source` p
 
 [float]
 [[accessing-metadata-fields]]
-=== Accessing Metadata Fields
-You can access metadata fields in the same way that you access fields in the source. This
-is possible because Elasticsearch doesn't allow fields in the source that have the
-same name as metadata fields.
-
-The following example sets the `_id` metadata field of a document to `1`:
+=== 访问元数据字段
+你可以采用同样的方法访问元数据字段，因为 Elasticsearch 不允许用户定义的字段和元数据字段重复。如下的例子将文档元数据中的 `_id` 字段的值设置为 `1` ：
 
 [source,js]
 --------------------------------------------------
@@ -498,20 +468,16 @@ The following example sets the `_id` metadata field of a document to `1`:
 --------------------------------------------------
 // NOTCONSOLE
 
-The following metadata fields are accessible by a processor: `_index`, `_type`, `_id`, `_routing`.
+这些元数据字段都可以被处理器直接访问：`_index`, `_type`, `_id`, `_routing`.
 
 [float]
 [[accessing-ingest-metadata]]
-=== Accessing Ingest Metadata Fields
-Beyond metadata fields and source fields, ingest also adds ingest metadata to the documents that it processes.
-These metadata properties are accessible under the `_ingest` key. Currently ingest adds the ingest timestamp
-under the `_ingest.timestamp` key of the ingest metadata. The ingest timestamp is the time when Elasticsearch
-received the index or bulk request to pre-process the document.
+=== 访问 Ingest 元数据字段
+除了原始字段和 source 中用户定义的字段，ingest 功能在文档中还添加了 ingest 元数据，这些元数据属性可以通过 `_ingest` 关键字来访问。目前，在 `_ingest.timestamp` 键下面添加了 ingest 时间戳作为元数据。这里的 ingest 时间戳是指当 Elasticsearch 收到一个写入（index 或者 bulk）请求后，开始处理文档的时间。
 
-Any processor can add ingest-related metadata during document processing. Ingest metadata is transient
-and is lost after a document has been processed by the pipeline. Therefore, ingest metadata won't be indexed.
+任何一个处理器在处理文档的时候都可以添加 ingest 相关的元数据。Ingest 元数据是临时的，当文档被管道处理完毕之后就丢失了。因此，ingest 元数据不会被索引保存。
 
-The following example adds a field with the name `received`. The value is the ingest timestamp:
+如下的示例添加了一个名为 `received` 的字段，值是 ingest 时间戳：
 
 [source,js]
 --------------------------------------------------
@@ -524,19 +490,14 @@ The following example adds a field with the name `received`. The value is the in
 --------------------------------------------------
 // NOTCONSOLE
 
-Unlike Elasticsearch metadata fields, the ingest metadata field name `_ingest` can be used as a valid field name
-in the source of a document. Use `_source._ingest` to refer to the field in the source document. Otherwise, `_ingest`
-will be interpreted as an ingest metadata field.
+不像 Elasticsearch 元数据字段，ingest 元数据字段名称 `_ingest` 关键字在文档中是可以成为一个自定义字段的。需要使用 `_source._ingest` 来访问文档中定义的字段，否则 `_ingest` 关键字将会被解析成 ingest 元数据字段。
 
 [float]
 [[accessing-template-fields]]
-=== Accessing Fields and Metafields in Templates
-A number of processor settings also support templating. Settings that support templating can have zero or more
-template snippets. A template snippet begins with `{{` and ends with `}}`.
-Accessing fields and metafields in templates is exactly the same as via regular processor field settings.
+=== 访问模板中的字段及元数据字段
+许多处理器设置支持模板，支持模板的设定可以有零个或多个模板片段。一个模板片段从 `{{` 开始，到 `}}` 结束。访问模板中的字段及元数据字段（metafields）和处理正常字段的设置是一样的。
 
-The following example adds a field named `field_c`. Its value is a concatenation of
-the values of `field_a` and `field_b`.
+如下示例添加一个名为 `field_c` 的字段，它的值由 `field_a` 和 `field_b` 两个字段的值拼接而成。
 
 [source,js]
 --------------------------------------------------
@@ -549,8 +510,7 @@ the values of `field_a` and `field_b`.
 --------------------------------------------------
 // NOTCONSOLE
 
-The following example uses the value of the `geoip.country_iso_code` field in the source
-to set the index that the document will be indexed into:
+如下示例使用 source 中 `geoip.country_iso_code` 字段的值来设置 `_index` 值，这样文档就会被保存到这个索引中：
 
 [source,js]
 --------------------------------------------------
@@ -563,8 +523,7 @@ to set the index that the document will be indexed into:
 --------------------------------------------------
 // NOTCONSOLE
 
-Dynamic field names are also supported. This example sets the field named after the
-value of `service` to the value of the field `code`:
+动态字段名称原始支持的，如下示例设置 `service` 字段的值为 `code` 字段的值：
 
 [source,js]
 --------------------------------------------------
