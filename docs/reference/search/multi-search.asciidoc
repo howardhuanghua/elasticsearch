@@ -1,13 +1,9 @@
 [[search-multi-search]]
-== Multi Search API
+== 多搜索 API
 
-The multi search API allows to execute several search requests within
-the same API. The endpoint for it is `_msearch`.
+多搜索 API 允许你在相同的 API 中执行多个搜索请求。端点为 `_msearch` 。
 
-The format of the request is similar to the bulk API format and makes
-use of the newline delimited JSON (NDJSON) format. the structure is as
-follows (the structure is specifically optimized to reduce parsing if
-a specific search ends up redirected to another node):
+请求格式和 bulk API 格式相似，使用以换行符分割的 JSON（NDJSON）格式。结构如下所示（该结构经过特别的优化以降低解析代价当一个特定的搜索结束无需转发至另一个节点）：
 
 [source,js]
 --------------------------------------------------
@@ -18,13 +14,9 @@ body\n
 --------------------------------------------------
 // NOTCONSOLE
 
-*NOTE*: the final line of data must end with a newline character `\n`. Each newline character
-may be preceded by a carriage return `\r`. When sending requests to this endpoint the
-`Content-Type` header should be set to `application/x-ndjson`.
+*NOTE*: 数据的最后一行必须以一个换行符 `\n` 来结束。每个换行符前允许添加一个 `\r` 。当向该端点发送请求时应当将 `Content-Type` header 设置为 `application/x-ndjson` 。
 
-The header part includes which index / indices to search on, the `search_type`, `preference`,
-and `routing`. The body includes the typical search body request (including the `query`,
-`aggregations`, `from`, `size`, and so on). Here is an example:
+header 部分包含了当前请求应该应用于哪个或者哪些索引的信息，以及 `search_type` 、 `preference` 和 `routing` 。body 部分包含了通常搜索请求的 body（包含 `query` 、 `aggregations` 、 `from` 、 `size` 等）下面是一个例子：
 
 [source,js]
 --------------------------------------------------
@@ -48,18 +40,9 @@ $ curl -H "Content-Type: application/x-ndjson" -XGET localhost:9200/_msearch --d
 --------------------------------------------------
 // NOTCONSOLE
 
-Note, the above includes an example of an empty header (can also be just
-without any content) which is supported as well.
+注意，上面的例子中，header 为空（也可以没有任何内容）同样也是支持的。
 
-The response returns a `responses` array, which includes the search
-response and status code for each search request matching its order in
-the original multi search request. If there was a complete failure for that
-specific search request, an object with `error` message and corresponding
-status code will be returned in place of the actual search response.
-
-The endpoint allows to also search against an index/indices in the URI itself,
-in which case it will be used as the default unless explicitly defined otherwise
-in the header. For example:
+响应部分返回了一个 `responses` 数组，包含了按照原始多搜索请求顺序的对应响应以及状态码。如若某个搜索请求完全失败，会有一个包含 `error` 信息以及对应状态码的对象来取代实际的搜索响应。
 
 [source,js]
 --------------------------------------------------
@@ -74,39 +57,25 @@ GET twitter/_msearch
 // CONSOLE
 // TEST[setup:twitter]
 
-The above will execute the search against the `twitter` index for all the
-requests that don't define an index, and the last one will be executed
-against the `twitter2` index.
+以上中所有未指定具体索引的搜索请求都会针对 `twitter` 索引执行，最后一个则针对 `twitter2` 索引。
 
-The `search_type` can be set in a similar manner to globally apply to
-all search requests.
+`search_type` 可以用类似的方式设置为全局的以应用于所有搜索请求。
 
-The msearch's `max_concurrent_searches` request parameter can be used to control
-the maximum number of concurrent searches the multi search api will execute.
-This default is based on the number of data nodes and the default search thread pool size.
+多搜索的 `max_concurrent_searches` 请求参数可以用来控制多搜索 api 的最大并发请求数。默认值基于 data 节点数量以及默认的 搜索线程池大小。
 
-The request parameter `max_concurrent_shard_requests` can be used to control the
-maximum number of concurrent shard requests the each sub search request will execute.
-This parameter should be used to protect a single request from overloading a cluster
-(e.g., a default request will hit all indices in a cluster which could cause shard request rejections
-if the number of shards per node is high). This default is based on the number of
-data nodes in the cluster but at most `256`.In certain scenarios parallelism isn't achieved through
-concurrent request such that this protection will result in poor performance. For
-instance in an environment where only a very low number of concurrent search requests are expected
-it might help to increase this value to a higher number.
+请求参数 `max_concurrent_shard_requests` 可以用来控制每个搜索请求的最大分片并发请求数。该值应当用于保护集群避免被单个请求过载（默认请求会命中集群中的所有索引，当每个节点中分片数量过多时可能会导致分片请求被拒绝）默认值基于集群中 data 节点数量但最大为 `256` 。在某些特定场景并非通过并发请求来达到并行，这样该保护措施可能会导致性能降低。例如在某个环境中只会有很少的并发请求，将该值适当提高可能会有所帮助。
 
 [float]
 [[msearch-security]]
-=== Security
+=== 安全性
 
-See <<url-access-control>>
+详见 <<url-access-control>>
 
 [float]
 [[template-msearch]]
-=== Template support
+=== 模板支持
 
-Much like described in <<search-template>> for the _search resource, _msearch
-also provides support for templates. Submit them like follows:
+很像 <<search-template>> 中描述的 _search 资源那样， _msearch 同样支持模板。请像如下那样提交请求：
 
 [source,js]
 -----------------------------------------------
@@ -119,9 +88,9 @@ GET _msearch/template
 // CONSOLE
 // TEST[setup:twitter]
 
-for inline templates.
+来使用内联模板。
 
-You can also create search templates:
+你还可以这样创建搜索模板：
 
 [source,js]
 ------------------------------------------
@@ -161,7 +130,7 @@ POST /_scripts/my_template_2
 // CONSOLE
 // TEST[continued]
 
-and later use them in a _msearch:
+然后稍后在 _msearch 中使用它们：
 
 [source,js]
 -----------------------------------------------
@@ -173,3 +142,4 @@ GET _msearch/template
 -----------------------------------------------
 // CONSOLE
 // TEST[continued]
+

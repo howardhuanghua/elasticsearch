@@ -1,16 +1,11 @@
 [[search-suggesters]]
-== Suggesters
+== 建议器（Suggester）
 
-The suggest feature suggests similar looking terms based on a provided
-text by using a suggester. Parts of the suggest feature are still under
-development.
+搜索建议功能通过使用一个建议器对提供的文本给出建议的相近查询词条。搜索建议功能的部分特性还在开发当中。
 
-The suggest request part is defined alongside the query part in a `_search`
-request.
+搜索建议的请求体与 `_search` 请求中的查询请求体相邻。
 
-NOTE: `_suggest` endpoint has been deprecated in favour of using suggest via
-`_search` endpoint. In 5.0, the `_search` endpoint has been optimized for
-suggest only search requests.
+NOTE: `_suggest` 端点已经过时，作为替代请通过 `_search` 端点使用搜索建议。在 5.0， `_search` 端点已经为仅作为搜索建议的搜索请求进行优化。
 
 [source,js]
 --------------------------------------------------
@@ -34,10 +29,7 @@ POST twitter/_search
 // CONSOLE
 // TEST[setup:twitter]
 
-Several suggestions can be specified per request. Each suggestion is
-identified with an arbitrary name. In the example below two suggestions
-are requested. Both `my-suggest-1` and `my-suggest-2` suggestions use
-the `term` suggester, but have a different `text`.
+每个请求都可以指定多个搜索建议项（Suggestion）。每个建议项都可以通过指定一个任意名字来识别。在以下例子中请求了两个搜索建议项。`my-suggest-1` 和 `my-suggest-2` 均使用了 `term` 建议器但 `text` 的值却不同。
 
 [source,js]
 --------------------------------------------------
@@ -62,11 +54,7 @@ POST _search
 // CONSOLE
 // TEST[setup:twitter]
 
-The below suggest response example includes the suggestion response for
-`my-suggest-1` and `my-suggest-2`. Each suggestion part contains
-entries. Each entry is effectively a token from the suggest text and
-contains the suggestion entry text, the original start offset and length
-in the suggest text and if found an arbitrary number of options.
+在下方响应的例子中包含了 `my-suggest-1` 和 `my-suggest-2` 的建议项的响应。每个建议项部分包含多个入口。每个入口实际上是请求文本中的一个关键词以及包含该入口文本的建议项、建议结果文本中的原始的起始偏移量和长度以及是否命中了任何选项。
 
 [source,js]
 --------------------------------------------------
@@ -102,18 +90,13 @@ in the suggest text and if found an arbitrary number of options.
 // TESTRESPONSE[s/"my-suggest-2": \.\.\./"my-suggest-2": "$body.suggest.my-suggest-2"/]
 
 
-Each options array contains an option object that includes the
-suggested text, its document frequency and score compared to the suggest
-entry text. The meaning of the score depends on the used suggester. The
-term suggester's score is based on the edit distance.
+每个选项数组包含了一个选项对象，对象中包含了建议结果文本，它的文档频率以及对于该入口文本的分值。分值的意义取决于使用的建议器。term 建议器的分值基于编辑距离。
 
 [float]
 [[global-suggest]]
-=== Global suggest text
+=== 全局的建议请求文本
 
-To avoid repetition of the suggest text, it is possible to define a
-global text. In the example below the suggest text is defined globally
-and applies to the `my-suggest-1` and `my-suggest-2` suggestions.
+为了避免重复给定搜索建议的请求文本，我们可以定义一个全局的文本。在下面的例子中定义了一个全局的请求文本并应用于请求 `my-suggest-1` 和 `my-suggest-2` 中。
 
 [source,js]
 --------------------------------------------------
@@ -136,9 +119,7 @@ POST _search
 --------------------------------------------------
 // CONSOLE
 
-The suggest text can in the above example also be specified as
-suggestion specific option. The suggest text specified on suggestion
-level override the suggest text on the global level.
+上方例子中的请求文本还可以在搜索建议配置项中指定。在每个具体建议项中定义的文本会覆盖全局级别的请求文本。
 
 include::suggesters/term-suggest.asciidoc[]
 

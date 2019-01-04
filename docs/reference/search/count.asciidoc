@@ -1,11 +1,7 @@
 [[search-count]]
-== Count API
+== 计数 API
 
-The count API allows to easily execute a query and get the number of
-matches for that query. It can be executed across one or more indices.
-The query can either be provided using a simple query string as a
-parameter, or using the <<query-dsl,Query DSL>> defined within the request
-body. Here is an example:
+计数 API 可以非常容易地执行一个查询并返回匹配该查询的结果条数。它可以在一个或多个索引中执行。我们既可以简单的通过查询参数的方式指定又可以通过 <<query-dsl,查询 DSL>> 中定义的请求体来指定查询。下面是一个例子：
 
 [source,js]
 --------------------------------------------------
@@ -25,11 +21,9 @@ GET /twitter/_doc/_count
 --------------------------------------------------
 //CONSOLE
 
-NOTE: The query being sent in the body must be nested in a `query` key, same as
-the <<search-search,search api>> works
+NOTE: 通过请求体发送的查询条件必须位于一个 `query` 键中，如同 <<search-search,搜索 api>> 中定义的那样
 
-Both examples above do the same thing, which is count the number of
-tweets from the `twitter` index for a certain user. The result is:
+以上两个例子均完成了同一件事情，即统计位于 `twitter` 索引中一个指定用户的所有推文。结果为：
 
 [source,js]
 --------------------------------------------------
@@ -45,64 +39,47 @@ tweets from the `twitter` index for a certain user. The result is:
 --------------------------------------------------
 // TESTRESPONSE
 
-The query is optional, and when not provided, it will use `match_all` to
-count all the docs.
+查询条件是可选的，当未提供时，会使用 `match_all` 来统计所有文档。
 
 [float]
-=== Multi index
+=== 多索引
 
-The count API can be applied to <<search-multi-index,multiple indices>>.
+计数 API 可以应用于 <<search-multi-index,多索引>>。
 
 [float]
-=== Request Parameters
+=== 请求参数
 
-When executing count using the query parameter `q`, the query passed is
-a query string using Lucene query parser. There are additional
-parameters that can be passed:
+当通过查询参数 `q` 来执行计数时，查询将通过查询字符串进行并通过 Lucene 查询解析器进行解析。以下是可供选择额外参数：
 
 [cols="<,<",options="header",]
 |=======================================================================
-|Name |Description
-|`df` |The default field to use when no field prefix is defined within the
-query.
+|名字 |描述
+|`df` |当查询中未定义字段前缀时使用的默认字段。
 
-|`analyzer` |The analyzer name to be used when analyzing the query string.
+|`analyzer` |用来分析查询字符串的分析器名字。
 
-|`default_operator` |The default operator to be used, can be `AND` or
-`OR`. Defaults to `OR`.
+|`default_operator` |默认使用的操作符，可以为 `AND` 或 `OR` 。默认为 `OR` 。
 
-|`lenient` |If set to true will cause format based failures (like
-providing text to a numeric field) to be ignored. Defaults to false.
+|`lenient` |当设置为 true 将会忽略格式相关的错误（比如为数值字段提供了字符串值）。默认为 false 。
 
-|`analyze_wildcard` |Should wildcard and prefix queries be analyzed or
-not. Defaults to `false`.
+|`analyze_wildcard` |通配符查询以及前缀查询是否应当被解析。默认为 `false` 。
 
-|`terminate_after` |The maximum count for each shard, upon
-reaching which the query execution will terminate early.
-If set, the response will have a boolean field `terminated_early` to
-indicate whether the query execution has actually terminated_early.
-Defaults to no terminate_after.
+|`terminate_after` |每个分片最大的计数值，当达到该值时查询操作将会提前结束。如果设置了该值，响应中会携带一个布尔字段 `terminated_early` 来表示查询操作是否提前结束了。默认为未设置 terminated_early。
 |=======================================================================
 
 [float]
-=== Request Body
+=== 请求体
 
-The count can use the <<query-dsl,Query DSL>> within
-its body in order to express the query that should be executed. The body
-content can also be passed as a REST parameter named `source`.
+计数请求可以在请求体中使用 <<query-dsl,Query DSL>> 来表示需要执行怎样的查询操作。请求体内容还可以通过一个名为 `source` 的 REST 参数进行传递。
 
-Both HTTP GET and HTTP POST can be used to execute count with body.
-Since not all clients support GET with body, POST is allowed as well.
+HTTP GET 和 HTTP POST 均可用于执行带请求体的计数操作。由于并不是所有客户端都支持带请求体的 GET 请求，所以 POST 请求也是同样支持的。
 
 [float]
-=== Distributed
+=== 分布式
 
-The count operation is broadcast across all shards. For each shard id
-group, a replica is chosen and executed against it. This means that
-replicas increase the scalability of count.
+计数操作会在所有分片中广播。对于每个分片 id 组，将会选择一个副本然后在其上执行。这意味着分片副本可以提高计数的扩展能力。
 
 [float]
-=== Routing
+=== 路由
 
-The routing value (a comma separated list of the routing values) can be
-specified to control which shards the count request will be executed on.
+可以通过指定路由值（一个由逗号分割的路由值列表）来控制计数请求会在哪些分片上执行。
