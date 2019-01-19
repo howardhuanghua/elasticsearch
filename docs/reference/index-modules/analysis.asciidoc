@@ -1,12 +1,9 @@
 [[index-modules-analysis]]
-== Analysis
+== 分析
 
-The index analysis module acts as a configurable registry of _analyzers_
-that can be used in order to convert a string field into individual terms
-which are:
+索引的分词模块充当可配置的 _分词器_ ，将字符串转化为各种术语，用于：
 
-* added to the inverted index in order to make the document searchable
-* used by high level queries such as the <<query-dsl-match-query,`match` query>>
-  to generate search terms.
+* 添加到倒排索引中，以使文档可搜索。
+* 被高级别查询使用，比如 <<query-dsl-match-query,`match` 查询>>， 来生成搜索词条。
 
-See <<analysis>> for configuration details.
+有关配置详情，请参阅 <<analysis>> 。

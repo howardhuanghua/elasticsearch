@@ -613,16 +613,11 @@ POST _ingest/pipeline/_simulate?verbose
 
 [float]
 [[accessing-error-metadata]]
-=== Accessing Error Metadata From Processors Handling Exceptions
+=== 访问元数据字段错误信息处理异常
 
-You may want to retrieve the actual error message that was thrown
-by a failed processor. To do so you can access metadata fields called
-`on_failure_message`, `on_failure_processor_type`, and `on_failure_processor_tag`. These fields are only accessible
-from within the context of an `on_failure` block.
+如果想访问失败的处理器的详细错误信息，只需要访问这些元数据字段 `on_failure_message`, `on_failure_processor_type` 和 `on_failure_processor_tag` 即可。这些字段只能在 `on_failure` 包括的区域中访问。
 
-Here is an updated version of the example that you
-saw earlier. But instead of setting the error message manually, the example leverages the `on_failure_message`
-metadata field to provide the error message.
+如下是一个之前看过的例子的升级版。通过使用 `on_failure_message` 元数据字段提供错误信息，这样无需再手动设置错误信息：
 
 [source,js]
 --------------------------------------------------
@@ -649,9 +644,9 @@ metadata field to provide the error message.
 // NOTCONSOLE
 
 [[ingest-processors]]
-== Processors
+== 处理器
 
-All processors are defined in the following way within a pipeline definition:
+所有的处理器都被定义在如下所示的管道定义区：
 
 [source,js]
 --------------------------------------------------
@@ -663,18 +658,14 @@ All processors are defined in the following way within a pipeline definition:
 --------------------------------------------------
 // NOTCONSOLE
 
+每个处理器定义了自己的配置参数，但是所有的处理器都可以定义 `tag`, `on_failure` 和 `if` 字段，这些字段是可选的。
 Each processor defines its own configuration parameters, but all processors have
 the ability to declare `tag`, `on_failure` and `if` fields. These fields are optional.
 
-A `tag` is simply a string identifier of the specific instantiation of a certain
-processor in a pipeline. The `tag` field does not affect the processor's behavior,
-but is very useful for bookkeeping and tracing errors to specific processors.
+`tag` 字段是一个简单的字符串标识符，其用于标识管道中一个具体的处理器实例。 `tag` 字段不影响处理器的行为，但是跟踪具体处理器的错误信息的时候非常有用，可用于识别不同的处理器。
 
-The `if` field must contain a script that returns a boolean value. If the script evaluates to `true`
-then the processor will be executed for the given document otherwise it will be skipped.
-The `if` field takes an object with the script fields defined in <<script-processor, script-options>>
-and accesses a read only version of the document via the same `ctx` variable used by scripts in the
-<<script-processor>>.
+`if` 字段必须包含一个可以返回 boolean 值的脚本。如果这个脚本返回 `true` ，处理器将会被执行并处理提供的文档，否则该处理器将会被跳过。
+`if` 字段在 <<script-processor, script-options>> 中定义的脚本字段中接受一个对象，该对象可以以只读形式访问文档，访问方式和在 <<script-processor>> 中定义在脚本中访问 `ctx` 变量一样。
 
 [source,js]
 --------------------------------------------------
@@ -688,45 +679,37 @@ and accesses a read only version of the document via the same `ctx` variable use
 --------------------------------------------------
 // NOTCONSOLE
 
-See <<handling-failure-in-pipelines>> to learn more about the `on_failure` field and error handling in pipelines.
+查看 <<handling-failure-in-pipelines>> 了解更多关于 `on_failure` 字段及管道中错误处理的内容。
 
-The <<ingest-info,node info API>> can be used to figure out what processors are available in a cluster.
-The <<ingest-info,node info API>> will provide a per node list of what processors are available.
+<<ingest-info, 节点信息接口>>会提供每个节点所有可用的处理器。
 
-Custom processors must be installed on all nodes. The put pipeline API will fail if a processor specified in a pipeline
-doesn't exist on all nodes. If you rely on custom processor plugins make sure to mark these plugins as mandatory by adding
-`plugin.mandatory` setting to the `config/elasticsearch.yml` file, for example:
+自定义的处理器必须在每个节点上安装。如果管道中定义的某个处理器并不是每个节点都有，则创建管道接口将会失败。如果你依赖一个自定义的处理器插件，请通过在 `config/elasticsearch.yml` 配置文件中定义 `plugin.mandatory` 确保这些插件是强制的。例如：
 
 [source,yaml]
 --------------------------------------------------
 plugin.mandatory: ingest-attachment,ingest-geoip
 --------------------------------------------------
 
-A node will not start if either of these plugins are not available.
+这样节点将不会被成功启动如果其中一个插件不可用。
 
-The <<ingest-stats,node stats API>> can be used to fetch ingest usage statistics, globally and on a per
-pipeline basis. Useful to find out which pipelines are used the most or spent the most time on preprocessing.
+<<ingest-info, 节点信息接口>>可以用来获取 ingest 使用统计信息，全局的和每个管道的。可以非常方便的查看哪个管道使用的最频繁，或者处理过程中最花时间。
 
 [float]
-=== Ingest Processor Plugins
+=== Ingest 处理器插件
 
-Additional ingest processors can be implemented and installed as Elasticsearch {plugins}/intro.html[plugins].
-See {plugins}/ingest.html[Ingest plugins] for information about the available ingest plugins.
+更多的 ingest 处理器可以通过自定义 Elasticsearch {plugins}/intro.html[插件]实现。查看 {plugins}/ingest.html[Ingest 插件]获取更多可用的 ingest 插件。
 
 [[append-processor]]
-=== Append Processor
-Appends one or more values to an existing array if the field already exists and it is an array.
-Converts a scalar to an array and appends one or more values to it if the field exists and it is a scalar.
-Creates an array containing the provided values if the field doesn't exist.
-Accepts a single value or an array of values.
+=== 追加处理器
+追加一个或多个值到一个已存在的数组字段中，如果字段已存在且是一个数组。转换一个标量为一个数组并追加一个或多个值，如果字段存在且是一个标量。创建一个数组字段包含所提供的值，如果字段不存在。接受单个值或者一组值。
 
 [[append-options]]
 .Append Options
 [options="header"]
 |======
-| Name      | Required  | Default  | Description
-| `field`  | yes       | -        | The field to be appended to. Supports <<accessing-template-fields,template snippets>>.
-| `value`  | yes       | -        | The value to be appended. Supports <<accessing-template-fields,template snippets>>.
+| 名称     | 必选      | 默认值   | 描述
+| `field`  | 是       | -        | 被追加的字段。支持<<accessing-template-fields, 模板片段>>。
+| `value`  | 是       | -        | 被追加的值。支持<<accessing-template-fields, 模板片段>>。
 include::ingest-node-common-processor.asciidoc[]
 |======
 
@@ -742,20 +725,19 @@ include::ingest-node-common-processor.asciidoc[]
 // NOTCONSOLE
 
 [[bytes-processor]]
-=== Bytes Processor
-Converts a human readable byte value (e.g. 1kb) to its value in bytes (e.g. 1024).
+=== 字节处理器
+将一个可读的字节值（例如：1kb）转换为其真实值（例如：1024）。
 
-Supported human readable units are "b", "kb", "mb", "gb", "tb", "pb" case insensitive. An error will occur if
-the field is not a supported format or resultant value exceeds 2^63.
+支持的单位包括，"b"、"kb"、"mb"、"gb"、"tb"、"pb" 且不区分大小写。如果字段的后缀格式不支持或者计算结果超过 2^63 则会报错。
 
 [[bytes-options]]
-.Bytes Options
+.字节处理器选项
 [options="header"]
 |======
-| Name             | Required  | Default  | Description
-| `field`          | yes       | -        | The field to convert
-| `target_field`   | no        | `field`  | The field to assign the converted value to, by default `field` is updated in-place
-| `ignore_missing` | no        | `false`  | If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document
+| 名称             | 必选      | 默认值   | 描述
+| `field`          | 是        | -        | 被转换的字段。
+| `target_field`   | 否        | `field`  | 目标字段，默认情况字段会被就地更新。
+| `ignore_missing` | 否        | `false`  | 如果为 `true` 且 `field` 不存在或者为 `null`, 处理器不会对文档做出任何修改直接退出。
 include::ingest-node-common-processor.asciidoc[]
 |======
 
@@ -770,31 +752,24 @@ include::ingest-node-common-processor.asciidoc[]
 // NOTCONSOLE
 
 [[convert-processor]]
-=== Convert Processor
-Converts a field in the currently ingested document to a different type, such as converting a string to an integer.
-If the field value is an array, all members will be converted.
+=== 转换处理器
+将当前文档中的某个字段转换成另外一种类型。例如将字符串类型转换为整型。如果字段是一个数组，所有的成员将会被转换。
 
-The supported types include: `integer`, `long`, `float`, `double`, `string`, `boolean`, and `auto`.
+支持的类型包括： `integer` 、 `long` 、 `float` 、 `double` 、 `string` 、 `boolean` 和 `auto` 。
 
-Specifying `boolean` will set the field to true if its string value is equal to `true` (ignore case), to
-false if its string value is equal to `false` (ignore case), or it will throw an exception otherwise.
+字符串转换为 `boolean` 场景，如果字符串值等于 `true` （不区分大小写）则为 true，如果字符串值等于 `false` （不区分大小写）则为 false。否则会抛出异常。
 
-Specifying `auto` will attempt to convert the string-valued `field` into the closest non-string type.
-For example, a field whose value is `"true"` will be converted to its respective boolean type: `true`. Do note
-that float takes precedence of double in `auto`. A value of `"242.15"` will "automatically" be converted to
-`242.15` of type `float`. If a provided field cannot be appropriately converted, the Convert Processor will
-still process successfully and leave the field value as-is. In such a case, `target_field` will
-still be updated with the unconverted field value.
+指定 `auto` ，将会尝试将字符串字段值转换为相关的非字符串类型。例如，一个字符串字段其值为 `"true"` 将会被转换为一个 boolean 类型且值为 `true` 。注意，在 `auto` 场景下，float 类型优先级高于 double。例如， `"242.15"` 将会被自动的转换为 `float` 类型的 `242.15` 。如果提供的一个字段不能被正确的转换，转换处理器将仍然处理成功并保留字段原始值。在这种情况下， `target_field` 将仍然被更新为未转换的字段值。
 
 [[convert-options]]
 .Convert Options
 [options="header"]
 |======
-| Name             | Required  | Default  | Description
-| `field`          | yes       | -        | The field whose value is to be converted
-| `target_field`   | no        | `field`  | The field to assign the converted value to, by default `field` is updated in-place
-| `type`           | yes       | -        | The type to convert the existing value to
-| `ignore_missing` | no        | `false`  | If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document
+| 名称             | 必须      | 默认值   | 描述
+| `field`          | 是        | -        | 值被转换的字段。
+| `target_field`   | 否        | `field`  | 值被转换后保存的目标字段，默认情况字段被就地更新。
+| `type`           | 是        | -        | 值被转换的类型。
+| `ignore_missing` | 否        | `false`  | 如果为 `true` 且 `field` 不存在或者为 `null`, 处理器将会退出不对文档做任何修改。
 include::ingest-node-common-processor.asciidoc[]
 |======
 
@@ -816,28 +791,24 @@ PUT _ingest/pipeline/my-pipeline-id
 // NOTCONSOLE
 
 [[date-processor]]
-=== Date Processor
+=== 日期处理器
 
-Parses dates from fields, and then uses the date or timestamp as the timestamp for the document.
-By default, the date processor adds the parsed date as a new field called `@timestamp`. You can specify a
-different field by setting the `target_field` configuration parameter. Multiple date formats are supported
-as part of the same date processor definition. They will be used sequentially to attempt parsing the date field,
-in the same order they were defined as part of the processor definition.
+解析字段中的日期字段，并使用该日期或者时间戳作为文档的时间（timestamp）字段。默认情况，日期处理器添加解析过的日期值作为一个新的字段并命名为 `@timestamp` ，你也可以通过 `target_field` 参数配置一个不同的名称。日期处理器支持多种类型的日期格式，它们在处理器定义的时候指定。它们将会被按照其定义的顺序来解析目标日期字段。
 
 [[date-options]]
-.Date options
+.日期选项
 [options="header"]
 |======
-| Name                   | Required  | Default             | Description
-| `field`                | yes       | -                   | The field to get the date from.
-| `target_field`         | no        | @timestamp          | The field that will hold the parsed date.
-| `formats`              | yes       | -                   | An array of the expected date formats. Can be a Joda pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N.
-| `timezone`        | no        | UTC                 | The timezone to use when parsing the date. Supports <<accessing-template-fields,template snippets>>.
-| `locale`          | no        | ENGLISH             | The locale to use when parsing the date, relevant when parsing month names or week days. Supports <<accessing-template-fields,template snippets>>.
+| 名称                   | 必须      | 默认值              | 描述
+| `field`                | 是        | -                   | 获取日期的字段。
+| `target_field`         | 否        | @timestamp          | 日期目标保存字段。
+| `formats`              | 是        | -                   | 日期格式的数组，可以是 Joda 模式的，也可以是如下几种格式的一种：ISO8601、UNIX、UNIX_MS 或者 TAI64N。
+| `timezone`             | 否        | UTC                 | 解析日期时使用的时区。支持<<accessing-template-fields, 模板片段>>。
+| `locale`               | 否        | ENGLISH             | 解析日期时使用的语言环境（locale），在解析月份名称或星期时使用。支持<<accessing-template-fields, 模板片段>>。
 include::ingest-node-common-processor.asciidoc[]
 |======
 
-Here is an example that adds the parsed date to the `timestamp` field based on the `initial_date` field:
+如下是解析 `initial_date` 字段日期值并添加至 `timestamp` 字段的例子：
 
 [source,js]
 --------------------------------------------------
@@ -857,10 +828,7 @@ Here is an example that adds the parsed date to the `timestamp` field based on t
 --------------------------------------------------
 // NOTCONSOLE
 
-The `timezone` and `locale` processor parameters are templated. This means that their values can be
-extracted from fields within documents. The example below shows how to extract the locale/timezone
-details from existing fields, `my_timezone` and `my_locale`, in the ingested document that contain
-the timezone and locale values.
+`timezone` 和 `locale` 处理器参数是模板化的，这意味着它们的值可以从文档的字段中提取。如下的例子演示如何从文档中已存在的字段 `my_timezone` 和 `my_locale` 中提取语言环境和时区（locale/timezone）信息：
 
 [source,js]
 --------------------------------------------------
@@ -882,22 +850,15 @@ the timezone and locale values.
 // NOTCONSOLE
 
 [[date-index-name-processor]]
-=== Date Index Name Processor
+=== 日期索引名称处理器
 
-The purpose of this processor is to point documents to the right time based index based
-on a date or timestamp field in a document by using the <<date-math-index-names, date math index name support>>.
+这个处理器的目的是让写入的文档被正确的按照其时间字段指定的时间放入对应的时间序列索引中。主要是基于<<date-math-index-names, 日期计算索引名称表达式>>的支持。
 
-The processor sets the `_index` meta field with a date math index name expression based on the provided index name
-prefix, a date or timestamp field in the documents being processed and the provided date rounding.
+这个处理器通过基于指定的索引名称前缀加上计算出来的时间后缀作为索引名称来设定 `_index` 元数据字段，文档中的日期或时间戳字段将会用于计算时间后缀。 
 
-First, this processor fetches the date or timestamp from a field in the document being processed. Optionally,
-date formatting can be configured on how the field's value should be parsed into a date. Then this date,
-the provided index name prefix and the provided date rounding get formatted into a date math index name expression.
-Also here optionally date formatting can be specified on how the date should be formatted into a date math index name
-expression.
+首先，这个处理器从文档某个字段中提取日期或时间戳并处理，字段的值被解析成什么格式的日期是可以配置的。接下来，指定的索引名称前缀将和处理好的日期被格式化成完整的滚动索引名称，在格式化成索引名过程中，格式是可配置的。
 
-An example pipeline that points documents to a monthly index that starts with a `myindex-` prefix based on a
-date in the `date1` field:
+如下是通过一个管道将文档写入到按月滚动的索引中的例子，该索引名以 `myindex-` 为前缀，后缀从 `date1` 字段中解析。
 
 [source,js]
 --------------------------------------------------
@@ -917,8 +878,7 @@ PUT _ingest/pipeline/monthlyindex
 --------------------------------------------------
 // CONSOLE
 
-
-Using that pipeline for an index request:
+使用这个管道处理写入请求：
 
 [source,js]
 --------------------------------------------------
@@ -949,13 +909,9 @@ PUT /myindex/_doc/1?pipeline=monthlyindex
 --------------------------------------------------
 // TESTRESPONSE
 
+上面的请求不会将示例文档写入名为 `myindex` 的索引中，而是写入 `myindex-2016-04-01` 索引中，因为其是按月分类滚动的。这是因为日期索引名称处理器覆盖了文档的 `_index` 属性。
 
-The above request will not index this document into the `myindex` index, but into the `myindex-2016-04-01` index because
-it was rounded by month. This is because the date-index-name-processor overrides the `_index` property of the document.
-
-To see the date-math value of the index supplied in the actual index request which resulted in the above document being
-indexed into `myindex-2016-04-01` we can inspect the effects of the processor using a simulate request.
-
+我们可以通过管道模拟请求接口查看实际写入请求中，文档如何根据其提供的日期字段分配索引：
 
 [source,js]
 --------------------------------------------------
@@ -985,7 +941,7 @@ POST _ingest/pipeline/_simulate
 --------------------------------------------------
 // CONSOLE
 
-and the result:
+结果：
 
 [source,js]
 --------------------------------------------------
@@ -1009,45 +965,41 @@ and the result:
 --------------------------------------------------
 // TESTRESPONSE[s/2016-11-08T19:43:03.850\+0000/$body.docs.0.doc._ingest.timestamp/]
 
-The above example shows that `_index` was set to `<myindex-{2016-04-25||/M{yyyy-MM-dd|UTC}}>`. Elasticsearch
-understands this to mean `2016-04-01` as is explained in the <<date-math-index-names, date math index name documentation>>
+上面的示例展示了 `_index` 被修改为 `<myindex-{2016-04-25||/M{yyyy-MM-dd|UTC}}>` 。按照在<<date-math-index-names, 日期计算索引名称文档>>中描述的方法，Elasticsearch 会认为其是 `2016-04-01` （当月第一天）。
 
 [[date-index-name-options]]
-.Date index name options
+.日期索引名称选项
 [options="header"]
 |======
-| Name                   | Required  | Default                      | Description
-| `field`                | yes       | -                            | The field to get the date or timestamp from.
-| `index_name_prefix`    | no        | -                            | A prefix of the index name to be prepended before the printed date. Supports <<accessing-template-fields,template snippets>>.
-| `date_rounding`        | yes       | -                            | How to round the date when formatting the date into the index name. Valid values are: `y` (year), `M` (month), `w` (week), `d` (day), `h` (hour), `m` (minute) and `s` (second). Supports <<accessing-template-fields,template snippets>>.
-| `date_formats`         | no        | yyyy-MM-dd'T'HH:mm:ss.SSSZ   | An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a Joda pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N.
-| `timezone`             | no        | UTC                          | The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.
-| `locale`               | no        | ENGLISH                      | The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days.
-| `index_name_format`    | no        | yyyy-MM-dd                   | The format to be used when printing the parsed date into the index name. An valid Joda pattern is expected here. Supports <<accessing-template-fields,template snippets>>.
+| 名称                   | 必选      | 默认值                       | 描述
+| `field`                | 是        | -                            | 获取日期或时间戳的字段。
+| `index_name_prefix`    | 否        | -                            | 日期前面的索引名前缀，支持<<accessing-template-fields, 模板片段>>.
+| `date_rounding`        | 是        | -                            | 格式化索引名的时候如何规整日期。合法的值包括： `y` (年), `M` (月), `w` (周), `d` (日), `h` (小时), `m` (分) and `s` (秒)。支持<<accessing-template-fields, 模板片段>>。
+| `date_formats`         | 否        | yyyy-MM-dd'T'HH:mm:ss.SSSZ   | 一组日期格式，用于解析被处理文档中的日期/时间戳。可以是 Joda 模式或者以下格式中的一种：ISO8601、UNIX、UNIX_MS 或者 TAI64N。
+| `timezone`             | 否        | UTC                          | 解析日期时用的时区，当日期计算索引名称支持时，用于产生具体的索引名称。
+| `locale`               | 否        | ENGLISH                      | 解析预处理文档中的日期时使用的语言环境设置，在解析月份名称或星期时使用。 
+| `index_name_format`    | 否        | yyyy-MM-dd                   | 指定索引名称中的日期格式，支持合法的 Joda 模式。支持<<accessing-template-fields, 模板片段>>。
 include::ingest-node-common-processor.asciidoc[]
 |======
 
 [[dissect-processor]]
-=== Dissect Processor
+=== 剖析解析器
 
-Similar to the <<grok-processor,Grok Processor>>, dissect also extracts structured fields out of a single text field
-within a document.  However unlike the <<grok-processor,Grok Processor>>, dissect does not use
-https://en.wikipedia.org/wiki/Regular_expression[Regular Expressions]. This allows dissect's syntax to be simple and for
-some cases faster than the <<grok-processor,Grok Processor>>.
+和 <<grok-processor,Grok 处理器>>类似，剖析（dissect）处理器也是从文档字段的文本信息里面提取结构化数据。与 <<grok-processor,Grok 处理器>>不同的是，剖析处理器不使用https://en.wikipedia.org/wiki/Regular_expression[正则表达式]。这样使它的语法变得简单，在某些场景下比 <<grok-processor,Grok 处理器>>速度快。
 
-Dissect matches a single text field against a defined pattern.
+剖析处理器基于定义好的模式（pattern）匹配单一的文本字段。
 
-For example the following pattern:
+例如以下的模式：
 [source,txt]
 --------------------------------------------------
 %{clientip} %{ident} %{auth} [%{@timestamp}] \"%{verb} %{request} HTTP/%{httpversion}\" %{status} %{size}
 --------------------------------------------------
-will match a log line of this format:
+将会匹配如下格式的一行日志：
 [source,txt]
 --------------------------------------------------
 1.2.3.4 - - [30/Apr/1998:22:00:52 +0000] \"GET /english/venues/cities/images/montpellier/18.gif HTTP/1.0\" 200 3171
 --------------------------------------------------
-and result in a document with the following fields:
+产生如下字段的一条文档数据：
 [source,js]
 --------------------------------------------------
 "doc": {
@@ -1069,31 +1021,21 @@ and result in a document with the following fields:
 --------------------------------------------------
 // NOTCONSOLE
 
-A dissect pattern is defined by the parts of the string that will be discarded. In the example above the first part
-to be discarded is a single space. Dissect finds this space, then assigns the value of `clientip` is everything up
-until that space.
-Later dissect matches the `[` and then `]` and then assigns `@timestamp` to everything in-between `[` and `]`.
-Paying special attention the parts of the string to discard will help build successful dissect patterns.
+剖析模式会按照被丢弃的内容进行切分匹配，在上面的示例中，第一个被丢弃的内容就是空格，因为模式中字段之间是直接用空格分开的。剖析模式查找空格，然后将空格之前的所有内容赋值给 `clientip` 字段。后面的匹配中，当匹配 `[` 和 `]` 后，会把它们之间的所有内容赋值给 `@timestamp` 字段。注意正确的定义这些被丢弃的字符串片段才能构建出正确的剖析模式。 
 
-Successful matches require all keys in a pattern to have a value. If any of the `%{keyname}` defined in the pattern do
-not have a value, then an exception is thrown and may be handled by the <<handling-failure-in-pipelines,on_falure>> directive.
-An empty key `%{}` or a <<dissect-modifier-named-skip-key, named skip key>> can be used to match values, but exclude the value from
-the final document. All matched values are represented as string data types. The <<convert-processor, convert processor>>
-may be used to convert to expected data type.
+成功的匹配需要在模式中定义的所有键都有对应的值。如果任何一个 `%{keyname}` 定义的模式没有对应的值，就会抛出一个异常，可能会直接被当作<<handling-failure-in-pipelines,on_falure>>处理。一个空键 `%{}` 或者一个<<dissect-modifier-named-skip-key, 命名为跳过的键>>也可以用来匹配值，这样会去掉文档中的值。所有被匹配的值将会被处理成字符串类型。<<convert-processor, 转换处理器>>可以用于转换数据类型。
 
-Dissect also supports <<dissect-key-modifiers,key modifiers>> that can change dissect's default
-behavior. For example you can instruct dissect to ignore certain fields, append fields, skip over padding, etc.
-See <<dissect-key-modifiers, below>> for more information.
+剖析处理器也支持<<dissect-key-modifiers, 键修改>>，这样可以改变剖析处理器默认的行为。例如，你可以让剖析处理器忽略指定的字段、添加字段、跳过填充值等等。详细查看<<dissect-key-modifiers, 这里>>获取更多信息。
 
 [[dissect-options]]
-.Dissect Options
+.剖析模式选项
 [options="header"]
 |======
-| Name              | Required  | Default  | Description
-| `field`           | yes       | -        | The field to dissect
-| `pattern`         | yes       | -        | The pattern to apply to the field
-| `append_separator`| no        | "" (empty string) | The character(s) that separate the appended fields.
-| `ignore_missing`  | no        | false             | If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document
+| 名称              | 必须      | 默认值   | 描述
+| `field`           | 是        | -        | 被剖析的字段
+| `pattern`         | 是        | -        | 剖析使用的匹配模式
+| `append_separator`| 否        | "" (空字符串) | 对追加字段的分割符
+| `ignore_missing`  | 否        | false         | 如果为 `true` 且 `field` 指定的字段不存在或者是 `null`, 处理器将会跳过文档不做任何处理
 include::ingest-node-common-processor.asciidoc[]
 |======
 
@@ -1108,40 +1050,32 @@ include::ingest-node-common-processor.asciidoc[]
 --------------------------------------------------
 // NOTCONSOLE
 [[dissect-key-modifiers]]
-==== Dissect key modifiers
-Key modifiers can change the default behavior for dissection. Key modifiers may be found on the left or right
-of the `%{keyname}` always inside the `%{` and `}`. For example `%{+keyname ->}` has the append and right padding
-modifiers.
+==== 剖析处理器键修改器
+键修改器可以修改剖析处理器的默认行为。键修改器可能在 `%{keyname}` 的左边或者右边出现，但一定在 `%{` 和 `}` 之间。例如 `%{+keyname ->}` 有追加和右填充修改器。 
 
-.Dissect Key Modifiers
+.剖析处理器键修改器选项
 [options="header"]
 |======
-| Modifier      | Name               | Position       | Example                      | Description                                                  | Details
-| `->`          | Skip right padding | (far) right    | `%{keyname1->}`  | Skips any repeated characters to the right                   | <<dissect-modifier-skip-right-padding,link>>
-| `+`           | Append             | left           | `%{+keyname} %{+keyname}`    | Appends two or more fields together                          | <<dissect-modifier-append-key,link>>
-| `+` with `/n` | Append with order  | left and right | `%{+keyname/2} %{+keyname/1}` | Appends two or more fields together in the order specified   | <<dissect-modifier-append-key-with-order,link>>
-| `?`           | Named skip key     | left           | `%{?ignoreme}`  | Skips the matched value in the output. Same behavior as `%{}`| <<dissect-modifier-named-skip-key,link>>
-| `*` and `&`   | Reference keys     | left           | `%{*r1} %{&r1}`    | Sets the output key as value of `*` and output value of `&`  | <<dissect-modifier-reference-keys,link>>
+| 编辑器      | 名称               | 位置       | 示例                      | 描述                                                  | 详情
+| `->`          | 跳过右填充         | 右边最大匹配   | `%{keyname1->}`  | 跳过右边所有重复的字符                                    | <<dissect-modifier-skip-right-padding,link>>
+| `+`           | 追加               | 左边           | `%{+keyname} %{+keyname}`    | 追加两个或更多的字段在一起                    | <<dissect-modifier-append-key,link>>
+| `+` 携带 `/n` | 按顺序追加         | 左边和右边     | `%{+keyname/2} %{+keyname/1}` | 按照指定的顺序追加两个或跟多的字段在一起     | <<dissect-modifier-append-key-with-order,link>>
+| `?`           | 命名的跳过键       | 左边           | `%{?ignoreme}`  | 在输出结果中跳过匹配的值。和 `%{}` 的行为相同| <<dissect-modifier-named-skip-key,link>>
+| `*` 和 `&`    | 引用键             | 左边                    | `%{*r1} %{&r1}`    | 将输出的键设置为 `*` 值设置为 `&`  | <<dissect-modifier-reference-keys,link>>
 |======
 
 [[dissect-modifier-skip-right-padding]]
-===== Right padding modifier (`->`)
+===== 右填充修改器 (`->`)
 
-The algorithm that performs the dissection is very strict in that it requires all characters in the pattern to match
-the source string. For example, the pattern `%{fookey} %{barkey}` (1 space), will match the string "foo{nbsp}bar"
-(1 space), but will not match the string "foo{nbsp}{nbsp}bar" (2 spaces) since the pattern has only 1 space and the
-source string has 2 spaces.
+这个算法在剖析过程中非常严格，要求所有的字符都必须匹配目标字符串。例如，这个模式 `%{fookey} %{barkey}` （1个空格），将会匹配这个字符串 "foo{nbsp}bar"（1个空格）， 但是不匹配这个字符串 "foo{nbsp}{nbsp}bar"（两个空格），因为指定的模式只有一个空格而目标字符串有两个。
 
-The right padding modifier helps with this case. Adding the right padding modifier to the pattern `%{fookey->} %{barkey}`,
-It will now will match "foo{nbsp}bar" (1 space) and "foo{nbsp}{nbsp}bar" (2 spaces)
-and even "foo{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}bar" (10 spaces).
+这个右填充修改器在上述场景下可以派上用场，这个模式 `%{fookey->} %{barkey}` 中添加了右填充修改器，现在将会匹配 "foo{nbsp}bar"（1个空格）和 "foo{nbsp}{nbsp}bar"（两个空格），甚至是多个空格 "foo{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}bar"（10个空格）场景。
 
-Use the right padding modifier to allow for repetition of the characters after a `%{keyname->}`.
+使用右填充修改器处理关键字 `%{keyname->}` 之后的所有重复字符。
 
-The right padding modifier may be placed on any key with any other modifiers. It should always be the furthest right
-modifier. For example: `%{+keyname/1->}` and `%{->}`
+右填充修改器可以任意的键或者其它修改器一起使用，它应该始终是一个最右边的修改器。例如，`%{+keyname/1->}` and `%{->}` 。
 
-Right padding modifier example
+右填充修改器示例：
 |======
 | *Pattern* | `%{ts->} %{level}`
 | *Input*   |  1998-08-10T17:15:42,466{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}WARN
@@ -1150,9 +1084,9 @@ Right padding modifier example
 * level = WARN
 |======
 
-The right padding modifier may be used with an empty key to help skip unwanted data. For example, the same input string, but wrapped with brackets requires the use of an empty right padded key to achieve the same result.
+右填充修改器也可以和一个空键一起使用来跳过不需要的数据。例如，相同的输入字符串，但是用括号括起来，需要使用一个空的右填充键来实现相同的结果。
 
-Right padding modifier with empty key example
+如下示例演示用右填充修改器跳过中间的多个空格：
 |======
 | *Pattern* | `[%{ts}]%{->}[%{level}]`
 | *Input*   | [1998-08-10T17:15:42,466]{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}[WARN]
@@ -1161,13 +1095,11 @@ Right padding modifier with empty key example
 * level = WARN
 |======
 
-===== Append modifier (`+`)
+===== 追加修改器 (`+`)
 [[dissect-modifier-append-key]]
-Dissect supports appending two or more results together for the output.
-Values are appended left to right. An append separator can be specified.
-In this example the append_separator is defined as a space.
+剖析处理器支持在输出结果中追加两个或多个结果。值是从左到右追加，可以为追加的数据指定一个分割符。
 
-Append modifier example
+如下的示例中追加分割符定义为一个空格：
 |======
 | *Pattern* | `%{+name} %{+name} %{+name} %{+name}`
 | *Input*   | john jacob jingleheimer schmidt
@@ -1175,13 +1107,11 @@ Append modifier example
 * name = john jacob jingleheimer schmidt
 |======
 
-===== Append with order modifier (`+` and `/n`)
+===== 按顺序追加修改器 (`+` 加 `/n`)
 [[dissect-modifier-append-key-with-order]]
-Dissect supports appending two or more results together for the output.
-Values are appended based on the order defined (`/n`). An append separator can be specified.
-In this example the append_separator is defined as a comma.
+剖析处理器支持拼接两个或更多的结果到输出中。值按照 `/n` 里面定义的顺序追加。同样可以指定一个分割符。
 
-Append with order modifier example
+如下示例演示了使用逗号作为分隔符的按顺序追加的修改器：
 |======
 | *Pattern* | `%{+name/2} %{+name/4} %{+name/3} %{+name/1}`
 | *Input*   | john jacob jingleheimer schmidt
@@ -1189,12 +1119,11 @@ Append with order modifier example
 * name = schmidt,john,jingleheimer,jacob
 |======
 
-===== Named skip key (`?`)
+===== 命名跳过键 (`?`)
 [[dissect-modifier-named-skip-key]]
-Dissect supports ignoring matches in the final result. This can be done with an empty key `%{}`, but for readability
-it may be desired to give that empty key a name. 
+剖析处理器支持在最终结果集中忽略一些数据匹配，这个可以通过指定空键 `%{}` 来实现。但是为了可读性，需要给空键一个命名。 
 
-Named skip key modifier example
+命名跳过键示例：
 |======
 | *Pattern* | `%{clientip} %{?ident} %{?auth} [%{@timestamp}]`
 | *Input*   | 1.2.3.4 - - [30/Apr/1998:22:00:52 +0000]
