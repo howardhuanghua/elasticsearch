@@ -1132,12 +1132,11 @@ include::ingest-node-common-processor.asciidoc[]
 * @timestamp = 30/Apr/1998:22:00:52 +0000
 |======
 
-===== Reference keys (`*` and `&`)
+===== 引用键 (`*` 和 `&`)
 [[dissect-modifier-reference-keys]]
-Dissect support using parsed values as the key/value pairings for the structured content. Imagine a system that 
-partially logs in key/value pairs. Reference keys allow you to maintain that key/value relationship.
+剖析处理器支持使用解析过的值作为结构化数据的键值对。假设一个系统中有部分键值对的数据，引用键可以帮助保留它们的键值关系。
  
-Reference key modifier example
+引用键修改器示例：
 |======
 | *Pattern* | `[%{ts}] [%{level}] %{*p1}:%{&p1} %{*p2}:%{&p2}`
 | *Input*   | [2018-08-10T17:15:42,466] [ERR] ip:1.2.3.4 error:REFUSED
@@ -1149,15 +1148,14 @@ Reference key modifier example
 |====== 
 
 [[drop-processor]]
-=== Drop Processor
-Drops the document without raising any errors. This is useful to prevent the document from
-getting indexed based on some condition.
+=== 丢弃处理器
+丢弃文档且不抛出任何异常。这个处理器可以在带条件的场景有效的过滤文档。
 
 [[drop-options]]
-.Drop Options
+.丢弃处理器选项
 [options="header"]
 |======
-| Name              | Required  | Default  | Description
+| 名称             | 必须  | 默认值  | 描述
 include::ingest-node-common-processor.asciidoc[]
 |======
 
@@ -1172,19 +1170,17 @@ include::ingest-node-common-processor.asciidoc[]
 // NOTCONSOLE
 
 [[dot-expand-processor]]
-=== Dot Expander Processor
+=== 点扩展处理器
 
-Expands a field with dots into an object field. This processor allows fields
-with dots in the name to be accessible by other processors in the pipeline.
-Otherwise these <<accessing-data-in-pipelines,fields>> can't be accessed by any processor.
+使用点号扩展一个字段为一个对象字段。这个处理器允许名称中包含点号的字段可以被管道中的其它处理器访问。不使用这个处理器，这些<<accessing-data-in-pipelines,字段>>不能被其它处理器访问。
 
 [[dot-expender-options]]
-.Dot Expand Options
+.点扩展处理器选项
 [options="header"]
 |======
-| Name     | Required  | Default  | Description
-| `field`  | yes       | -        | The field to expand into an object field
-| `path`   | no        | -        | The field that contains the field to expand. Only required if the field to expand is part another object field, because the `field` option can only understand leaf fields.
+| 名称     | 必须      | 默认值   | 描述
+| `field`  | 是        | -        | 被扩展的字段。
+| `path`   | 否        | -        | The field that contains the field to expand. 仅当被扩展的字段是对象字段的一部分的时候猜啊需要，因为 `field` 选项只能识别最底层的叶子字段。Only required if the field to expand is part another object field, because the `field` option can only understand leaf fields.
 include::ingest-node-common-processor.asciidoc[]
 |======
 
@@ -1198,7 +1194,7 @@ include::ingest-node-common-processor.asciidoc[]
 --------------------------------------------------
 // NOTCONSOLE
 
-For example the dot expand processor would turn this document:
+例如如下的点扩展处理器可以将如下文档：
 
 [source,js]
 --------------------------------------------------
@@ -1208,7 +1204,7 @@ For example the dot expand processor would turn this document:
 --------------------------------------------------
 // NOTCONSOLE
 
-into:
+处理为：
 
 [source,js]
 --------------------------------------------------
@@ -1220,11 +1216,9 @@ into:
 --------------------------------------------------
 // NOTCONSOLE
 
-If there is already a `bar` field nested under `foo` then
-this processor merges the `foo.bar` field into it. If the field is
-a scalar value then it will turn that field into an array field.
+如果 `foo` 已经嵌套了一个 `bar` 字段，这个处理器会将其与 `foo.bar` 字段合并。如果这个字段是一个标量值，该处理器会将其转换为数组字段。
 
-For example, the following document:
+例如如下的文档：
 
 [source,js]
 --------------------------------------------------
@@ -1237,7 +1231,7 @@ For example, the following document:
 --------------------------------------------------
 // NOTCONSOLE
 
-is transformed by the `dot_expander` processor into:
+将会被处理器 `dot_expander` 转换为:
 
 [source,js]
 --------------------------------------------------
@@ -1249,10 +1243,9 @@ is transformed by the `dot_expander` processor into:
 --------------------------------------------------
 // NOTCONSOLE
 
-If any field outside of the leaf field conflicts with a pre-existing field of the same name,
-then that field needs to be renamed first.
+如果任何一个叶子字段之外的字段和将被处理器解析出来的字段同名，则必须先将其改名。
 
-Consider the following document:
+考虑如下文档：
 
 [source,js]
 --------------------------------------------------
@@ -1263,10 +1256,7 @@ Consider the following document:
 --------------------------------------------------
 // NOTCONSOLE
 
-Then the `foo` needs to be renamed first before the `dot_expander`
-processor is applied. So in order for the `foo.bar` field to properly
-be expanded into the `bar` field under the `foo` field the following
-pipeline should be used:
+其中的 `foo` 字段需要在处理器 `dot_expander` 应用之前先改名。因此为了顺利的将 `foo.bar` 字段扩展为 `foo` 下的 `bar` 字段，需要使用如下的管道：
 
 [source,js]
 --------------------------------------------------
@@ -1288,21 +1278,18 @@ pipeline should be used:
 --------------------------------------------------
 // NOTCONSOLE
 
-The reason for this is that Ingest doesn't know how to automatically cast
-a scalar field to an object field.
+这样做的原因是因为 Ingest 并不知道如何自动的将一个标量字段转换为一个对象字段。
 
 [[fail-processor]]
-=== Fail Processor
-Raises an exception. This is useful for when
-you expect a pipeline to fail and want to relay a specific message
-to the requester.
+=== 失败处理器
+该处理器主要是抛出异常。在预期管道可能会失败的场景非常有用，且可以返回一个具体的消息给请求方。
 
 [[fail-options]]
-.Fail Options
+.失败处理器选项
 [options="header"]
 |======
-| Name       | Required  | Default  | Description
-| `message`  | yes       | -        | The error message thrown by the processor. Supports <<accessing-template-fields,template snippets>>.
+| 名称       | 必须      | 默认值   | 描述
+| `message`  | 是        | -        | 处理器抛出的异常信息。支持<<accessing-template-fields, 模板片段>>。
 include::ingest-node-common-processor.asciidoc[]
 |======
 
@@ -1318,42 +1305,30 @@ include::ingest-node-common-processor.asciidoc[]
 // NOTCONSOLE
 
 [[foreach-processor]]
-=== Foreach Processor
+=== 遍历处理器
 
-Processes elements in an array of unknown length.
+遍历一个未知长度的数组。
 
-All processors can operate on elements inside an array, but if all elements of an array need to
-be processed in the same way, defining a processor for each element becomes cumbersome and tricky
-because it is likely that the number of elements in an array is unknown. For this reason the `foreach`
-processor exists. By specifying the field holding array elements and a processor that
-defines what should happen to each element, array fields can easily be preprocessed.
+所有的处理器可以处理素组中的每个元素，但是当数组中所有的元素都需要按照相同的方式处理的场景，为每个元素定义一个处理器将会变得笨重也很奇怪，因为数组元素的数量可能是未知的。这就是 `foreach` 遍历处理器存在的原因。通过指定包含数组元素的字段，并在处理器中指定如何处理每个元素，数组字段可以很容易被预处理。 
 
-A processor inside the foreach processor works in the array element context and puts that in the ingest metadata
-under the `_ingest._value` key. If the array element is a json object it holds all immediate fields of that json object.
-and if the nested object is a value is `_ingest._value` just holds that value. Note that if a processor prior to the
-`foreach` processor used `_ingest._value` key then the specified value will not be available to the processor inside
-the `foreach` processor. The `foreach` processor does restore the original value, so that value is available to processors
-after the `foreach` processor.
+遍历处理器将会遍历数组中的每个元素内容并将其放入到 ingest 元数据字段 `_ingest._value` 中。注意如果一个处理器在遍历处理器之前已经使用了 `_ingest._value` 字段，这样该值将不能在遍历处理器中使用。遍历处理器会复原原始值，这个值可以在遍历处理器之后的处理器中正常使用。
 
-Note that any other field from the document are accessible and modifiable like with all other processors. This processor
-just puts the current array element being read into `_ingest._value` ingest metadata attribute, so that it may be
-pre-processed.
+注意，文档中的其它任何字段是可以被其它处理器访问和修改的，这个处理器仅仅只是将当前数组中的元素放到 ingest 元数据 `_ingest._value` 中作为一个可读属性。因此，其可能会被预处理。
 
-If the `foreach` processor fails to process an element inside the array, and no `on_failure` processor has been specified,
-then it aborts the execution and leaves the array unmodified.
+如果遍历处理器处理数组中的元素失败了，且没有指定 `on_failure` 处理器，当前执行将会退出且不会对数组做任何操作。
 
 [[foreach-options]]
-.Foreach Options
+.遍历处理器选项
 [options="header"]
 |======
-| Name             | Required  | Default  | Description
-| `field`          | yes       | -        | The array field
-| `processor`      | yes       | -        | The processor to execute against each field
-| `ignore_missing` | no        | false    | If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document
+| 名称             | 必须      | 默认值   | 描述
+| `field`          | 是        | -        | 数组字段。
+| `processor`      | 是        | -        | 处理器该字段的处理器。
+| `ignore_missing` | 否        | 否       | 如果为 `true` 且 `field` 不存在或者为 `null` ，则处理器将会退出且不会对文档做任何修改。 
 include::ingest-node-common-processor.asciidoc[]
 |======
 
-Assume the following document:
+假设有如下文档：
 
 [source,js]
 --------------------------------------------------
@@ -1363,7 +1338,7 @@ Assume the following document:
 --------------------------------------------------
 // NOTCONSOLE
 
-When this `foreach` processor operates on this sample document:
+当如下的 `foreach` 遍历处理器操作该文档时：
 
 [source,js]
 --------------------------------------------------
@@ -1380,7 +1355,7 @@ When this `foreach` processor operates on this sample document:
 --------------------------------------------------
 // NOTCONSOLE
 
-Then the document will look like this after preprocessing:
+文档将会被处理为：
 
 [source,js]
 --------------------------------------------------
@@ -1390,7 +1365,7 @@ Then the document will look like this after preprocessing:
 --------------------------------------------------
 // NOTCONSOLE
 
-Let's take a look at another example:
+我们来看看另外一个例子：
 
 [source,js]
 --------------------------------------------------
@@ -1409,8 +1384,7 @@ Let's take a look at another example:
 --------------------------------------------------
 // NOTCONSOLE
 
-In this case, the `id` field needs to be removed,
-so the following `foreach` processor is used:
+这个例子中， `id` 字段需要被删除，因此使用如下的遍历处理器：
 
 [source,js]
 --------------------------------------------------
@@ -1427,7 +1401,7 @@ so the following `foreach` processor is used:
 --------------------------------------------------
 // NOTCONSOLE
 
-After preprocessing the result is:
+处理之后的结果如下：
 
 [source,js]
 --------------------------------------------------
@@ -1444,10 +1418,7 @@ After preprocessing the result is:
 --------------------------------------------------
 // NOTCONSOLE
 
-The wrapped processor can have a `on_failure` definition.
-For example, the `id` field may not exist on all person objects.
-Instead of failing the index request, you can use an `on_failure`
-block to send the document to the 'failure_index' index for later inspection:
+包装过的处理器可以包含失败处理器 `on_failure` 的定义。例如， 可能并不是每个 person 对象都包含 `id` 。为了不使整个 index 请求失败，你可以使用一个 `on_failure` 语句块将对应的文档发送到 'failure_index' 索引中便于后续分析：
 
 [source,js]
 --------------------------------------------------
@@ -1472,43 +1443,31 @@ block to send the document to the 'failure_index' index for later inspection:
 --------------------------------------------------
 // NOTCONSOLE
 
-In this example, if the `remove` processor does fail, then
-the array elements that have been processed thus far will
-be updated.
+在这个例子中，如果 `remove` 处理器失败了，那么数组中已经处理过的元素将会被更新。
 
-Another advanced example can be found in the {plugins}/ingest-attachment-with-arrays.html[attachment processor documentation].
+可以参考另外一个更高级一点的例子{plugins}/ingest-attachment-with-arrays.html[附加处理器文档].
 
 
 
 [[grok-processor]]
-=== Grok Processor
+=== Grok 处理器
 
-Extracts structured fields out of a single text field within a document. You choose which field to
-extract matched fields from, as well as the grok pattern you expect will match. A grok pattern is like a regular
-expression that supports aliased expressions that can be reused.
+该处理器从文档的单个文本字段中提取结构化字段。你可以选择从某个字段中提取匹配的字段，以及定义相应的 grok 匹配模式。Grok 模式和正则表达式类似，支持预定义一些表达式并重复利用。 
 
-This tool is perfect for syslog logs, apache and other webserver logs, mysql logs, and in general, any log format
-that is generally written for humans and not computer consumption.
-This processor comes packaged with many
-https://github.com/elastic/elasticsearch/blob/{branch}/libs/grok/src/main/resources/patterns[reusable patterns].
+这个工具非常适合用于 syslog 日志、apache 以及其他 web 服务相关的日志、mysql 日志等。总的来说，除了机器随机产生的任何人为编写的格式都可以支持。该处理器提供很多https://github.com/elastic/elasticsearch/blob/{branch}/libs/grok/src/main/resources/patterns[可重用的模式]。
 
-If you need help building patterns to match your logs, you will find the {kibana-ref}/xpack-grokdebugger.html[Grok Debugger] tool quite useful! The Grok Debugger is an {xpack} feature under the Basic License and is therefore *free to use*. The Grok Constructor at <http://grokconstructor.appspot.com/> is also a useful tool.
+如果你需要关于构建日志匹配模式的帮助信息，可以利用{kibana-ref}/xpack-grokdebugger.html[Grok 调试器]工具协助。Grok 调试器是一个 {xpack} 基础许可证（Basic License）下面的功能，因此是 *免费使用* 的。Grok 构造器 <http://grokconstructor.appspot.com/> 也是非常有用的功能。
 
 [[grok-basics]]
-==== Grok Basics
+==== Grok 基础
 
-Grok sits on top of regular expressions, so any regular expressions are valid in grok as well.
-The regular expression library is Oniguruma, and you can see the full supported regexp syntax
-https://github.com/kkos/oniguruma/blob/master/doc/RE[on the Onigiruma site].
+Grok 是基于正则表达式的，因此所有的正则表达式在 grok 中都是支持的。正则表达式库是 Oniguruma，可以在 https://github.com/kkos/oniguruma/blob/master/doc/RE[Onigiruma 文档]上查看详细的语法。
 
-Grok works by leveraging this regular expression language to allow naming existing patterns and combining them into more
-complex patterns that match your fields.
+Grok 处理器利用正则表达式预定义一些模式，然后将他们组合起来组成更复杂的模式来匹配对应的字段。
 
-The syntax for reusing a grok pattern comes in three forms: `%{SYNTAX:SEMANTIC}`, `%{SYNTAX}`, `%{SYNTAX:SEMANTIC:TYPE}`.
+重用 grok 模式的语法有如下三种格式： `%{SYNTAX:SEMANTIC}` 、 `%{SYNTAX}` 、 `%{SYNTAX:SEMANTIC:TYPE}` 。
 
-The `SYNTAX` is the name of the pattern that will match your text. For example, `3.44` will be matched by the `NUMBER`
-pattern and `55.3.244.1` will be matched by the `IP` pattern. The syntax is how you match. `NUMBER` and `IP` are both
-patterns that are provided within the default patterns set.
+`SYNTAX` 是用来匹配对应文本的模式的名称。例如 `3.44` 会被 `NUMBER` 模式匹配， `55.3.244.1` 会被 `IP` 模式匹配。 `NUMBER` 和 `IP` 都属于 grok 提供的默认模式。
 
 The `SEMANTIC` is the identifier you give to the piece of text being matched. For example, `3.44` could be the
 duration of an event, so you could call it simply `duration`. Further, a string `55.3.244.1` might identify
@@ -2492,4 +2451,4 @@ include::ingest-node-common-processor.asciidoc[]
   }
 }
 --------------------------------------------------
-// NOTCONSOLE
+o/ NOTCONSOLE

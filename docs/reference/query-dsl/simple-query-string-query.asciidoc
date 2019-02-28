@@ -1,10 +1,8 @@
 [[query-dsl-simple-query-string-query]]
-=== Simple Query String Query
+=== 简单查询字符串查询
 
-A query that uses the SimpleQueryParser to parse its context. Unlike the
-regular `query_string` query, the `simple_query_string` query will never
-throw an exception, and discards invalid parts of the query. Here is
-an example:
+使用 SimpleQueryParser 解析上下文的查询。与常规的 `query_string` 查询不同，
+`simple_query_string` 查询绝不会抛出异常，并丢弃查询的无效部分。这是一个例子：
 
 [source,js]
 --------------------------------------------------
@@ -21,87 +19,67 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-The `simple_query_string` top level parameters include:
+`simple_query_string` 顶级参数包括：
 
 [cols="<,<",options="header",]
 |=======================================================================
-|Parameter |Description
-|`query` |The actual query to be parsed. See below for syntax.
+|参数 |描述
+|`query` | 要解析的实际查询. 请参阅下面的语法。
 
-|`fields` |The fields to perform the parsed query against. Defaults to the
-`index.query.default_field` index settings, which in turn defaults to `*`.
-`*` extracts all fields in the mapping that are eligible to term queries
-and filters the metadata fields.
+|`fields` | 要执行分析查询的字段。默认是索引设置的 `index.query.default_field` ,依次默认为 `*`，
+`*` 会提取映射中符合词查询条件的所有字段，并过滤元数据字段。
 
-|`default_operator` |The default operator used if no explicit operator
-is specified. For example, with a default operator of `OR`, the query
-`capital of Hungary` is translated to `capital OR of OR Hungary`, and
-with default operator of `AND`, the same query is translated to
-`capital AND of AND Hungary`. The default value is `OR`.
+|`default_operator` | 如果没有指定显式运算符，则使用默认运算符。例如，使用 `OR` 作为默认运算符，
+查询 `capital of Hungary` 会被转换为 `capital OR of OR Hungary`，
+使用 `AND` 作为默认运算符，前面的查询会被转换成 `capital AND of AND Hungary`。
+默认值是 `OR`。
 
-|`analyzer` |Force the analyzer to use to analyze each term of the query when
-creating composite queries.
+|`analyzer` | 在创建复合查询时，强制分析器分析查询的每个词。
 
-|`flags` |Flags specifying which features of the `simple_query_string` to
-enable. Defaults to `ALL`.
+|`flags` | 指定 `simple_query_string` 的哪些功能启用的标志。默认是 `ALL`。
 
-|`analyze_wildcard` | Whether terms of prefix queries should be automatically
-analyzed or not. If `true` a best effort will be made to analyze the prefix. However,
-some analyzers will be not able to provide a meaningful results
-based just on the prefix of a term. Defaults to `false`.
+|`analyze_wildcard` | 前缀词查询是否应该自动地分析。如果为 `true` ，将尽最大努力分析前缀。
+然而，仅基于词的前缀，有些分析器无法提供有意义的结果。
 
-|`lenient` | If set to `true` will cause format based failures
-(like providing text to a numeric field) to be ignored.
+|`lenient` | 如果设置为 `true` ，将会导致格式失败（如给数字字段一个文本值）被忽略。
 
-|`minimum_should_match` | The minimum number of clauses that must match for a
- document to be returned. See the
- <<query-dsl-minimum-should-match,`minimum_should_match`>> documentation for the
- full list of options.
+|`minimum_should_match` | 子句必须匹配文档的最小数量。完整的选项列表，
+请参阅 <<query-dsl-minimum-should-match,`minimum_should_match`>> 文档。
 
-|`quote_field_suffix` | A suffix to append to fields for quoted parts of
-the query string. This allows to use a field that has a different analysis chain
-for exact matching. Look <<mixing-exact-search-with-stemming,here>> for a
-comprehensive example.
+|`quote_field_suffix` | 一个附加到字段的后缀，用于查询字符串的引用部分。这允许使用有不同分析链的字段来做精确匹配。
+<<mixing-exact-search-with-stemming,这里>> 有一个综合的示例。
 
-|`auto_generate_synonyms_phrase_query` |Whether phrase queries should be automatically generated
-for multi terms synonyms.
-Defaults to `true`.
+|`auto_generate_synonyms_phrase_query` |对于多项同义词，是否自动生成短语查询。默认是 `true`。
 
-|`all_fields` | deprecated[6.0.0, set `default_field` to `*` instead]
-Perform the query on all fields detected in the mapping that can
-be queried. Will be used by default when the `_all` field is disabled and no
-`default_field` is specified (either in the index settings or in the request
-body) and no `fields` are specified.
+|`all_fields` | 不推荐使用[6.0.0, 可以把 `default_field` 设置为 `*` 来代替它]，
+对映射中检测到的所有字段执行查询。当 `_all` 字段被禁用，
+没有指定 `default_field`（在索引设置中或者在请求体内），
+并且 `fields` 也没有指定时，默认被使用。
 
-|`fuzzy_prefix_length` |Set the prefix length for fuzzy queries. Default
-is `0`.
+|`fuzzy_prefix_length` |设置模糊查询的前缀长度。默认是 `0`。
 
-|`fuzzy_max_expansions` |Controls the number of terms fuzzy queries will
-expand to. Defaults to `50`
+|`fuzzy_max_expansions` |控制词模糊查询可以扩展的数量。默认是 `50`。
 
-|`fuzzy_transpositions` |Set to `false` to disable fuzzy transpositions (`ab` -> `ba`).
-Default is `true`.
+|`fuzzy_transpositions` |设置为 `false` 可以禁止模糊转置（`ab` -> `ba`）。默认是 `true`。
 
 |=======================================================================
 
 [float]
-===== Simple Query String Syntax
-The `simple_query_string` supports the following special characters:
+===== 简单查询字符串语法
+`simple_query_string` 支持以下特殊字符：
 
-* `+` signifies AND operation
-* `|` signifies OR operation
-* `-` negates a single token
-* `"` wraps a number of tokens to signify a phrase for searching
-* `*` at the end of a term signifies a prefix query
-* `(` and `)` signify precedence
-* `~N` after a word signifies edit distance (fuzziness)
-* `~N` after a phrase signifies slop amount
+* `+` 表示 AND 操作
+* `|` 表示 OR 操作
+* `-` 使一个词无效
+* `"` 包装一些词以表示要搜索的短语
+* `*` 在词的末尾表示前缀查询
+* `(` 和 `)` 表示优先权
+* `~N` 在单词后面表示编辑距离（模糊）
+* `~N` 在短语后面表示坡度
 
-In order to search for any of these special characters, they will need to
-be escaped with `\`.
+为了搜索这些特殊字符，它们需要使用 `\` 来转义。
 
-Be aware that this syntax may have a different behavior depending on the
-`default_operator` value. For example, consider the following query:
+请注意，这个语法可能有不同的行为，这取决于 `default_operator` 值。例如，考虑下以下查询：
 
 [source,js]
 --------------------------------------------------
@@ -117,26 +95,21 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-You may expect that documents containing only "foo" or "bar" will be returned,
-as long as they do not contain "baz", however, due to the `default_operator`
-being OR, this really means "match documents that contain "foo" or documents
-that contain "bar", or documents that don't contain "baz". If this is unintended
-then the query can be switched to `"foo bar +-baz"` which will not return
-documents that contain "baz".
+你可能期望返回只包含 "foo" 或者 "bar"，不包含 "baz" 的文档，但是，
+由于 `default_operator` 为 OR，这实际上意味着匹配包含 "foo" 或者  "bar"
+或者不包含 "baz" 的文档。如果这是无意义的，那么可以切换到 `"foo bar +-baz"`，
+将不会返回包含 "baz" 的文档。
 
 [float]
-==== Default Field
-When not explicitly specifying the field to search on in the query
-string syntax, the `index.query.default_field` will be used to derive
-which fields to search on. It defaults to `*` and the query will automatically
-attempt to determine the existing fields in the index's mapping that are queryable,
-and perform the search on those fields.
+==== 默认字段
+在查询字符串语法中，当没有明确指定要搜索的字段时，将会从 `index.query.default_field`
+获取要搜索的字段。默认为 `*` ，查询将自动尝试确定索引映射中可查询的现有字段，
+并在这些字段上执行搜索。
+
 
 [float]
-==== Multi Field
-The fields parameter can also include pattern based field names,
-allowing to automatically expand to the relevant fields (dynamically
-introduced fields included). For example:
+==== 多字段
+字段参数也可以包含基于模式的字段名称，允许自动扩展到相关字段（包括动态引入的字段）。例如：
 
 [source,js]
 --------------------------------------------------
@@ -153,10 +126,9 @@ GET /_search
 // CONSOLE
 
 [float]
-==== Flags
-`simple_query_string` support multiple flags to specify which parsing features
-should be enabled. It is specified as a `|`-delimited string with the
-`flags` parameter:
+==== 标记
+`simple_query_string` 支持使用多种标记来指定哪些解析功能应该启用。
+用 `|` 来分割使用的标记参数：
 
 [source,js]
 --------------------------------------------------
@@ -172,19 +144,19 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-The available flags are: `ALL`, `NONE`, `AND`, `OR`, `NOT`, `PREFIX`, `PHRASE`,
+可用的标记是： `ALL`, `NONE`, `AND`, `OR`, `NOT`, `PREFIX`, `PHRASE`,
 `PRECEDENCE`, `ESCAPE`, `WHITESPACE`, `FUZZY`, `NEAR`, and `SLOP`.
 
 [float]
-==== Synonyms
+==== 同义词
 
-The `simple_query_string` query supports multi-terms synonym expansion with the <<analysis-synonym-graph-tokenfilter,
-synonym_graph>> token filter. When this filter is used, the parser creates a phrase query for each multi-terms synonyms.
-For example, the following synonym: `"ny, new york" would produce:`
+`simple_query_string` 查询支持使用 <<analysis-synonym-graph-tokenfilter,
+synonym_graph>> 令牌过滤器进行多项同义词扩展。使用这个过滤器时，
+解析器会为每一个多项同义词创建一个短语查询。例如，以下同义词： "ny, new york" 将产生：
 
 `(ny OR ("new york"))`
 
-It is also possible to match multi terms synonyms with conjunctions instead:
+也可以使用连词来匹配多项同义词：
 
 [source,js]
 --------------------------------------------------
@@ -200,10 +172,9 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-The example above creates a boolean query:
+上面的示例创建了一个布尔查询：
 
 `(ny OR (new AND york)) city)`
 
-that matches documents with the term `ny` or the conjunction `new AND york`.
-By default the parameter `auto_generate_synonyms_phrase_query` is set to `true`.
-
+它用词 `ny` 或者 `new york` 匹配文档。默认情况下，
+参数 `auto_generate_synonyms_phrase_query` 设置为 `true`。

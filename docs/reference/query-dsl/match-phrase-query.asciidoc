@@ -1,8 +1,7 @@
 [[query-dsl-match-query-phrase]]
-=== Match Phrase Query
+=== 匹配短语查询
 
-The `match_phrase` query analyzes the text and creates a `phrase` query
-out of the analyzed text. For example:
+`match_phrase` 查询分析文本，并创建一个 `phrase` 查询。例如：
 
 [source,js]
 --------------------------------------------------
@@ -17,12 +16,11 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-A phrase query matches terms up to a configurable `slop`
-(which defaults to 0) in any order. Transposed terms have a slop of 2.
+一个短语查询通过可配置项 `slop`（默认为0）可以以任何顺序匹配条件。
+Transposed terms have a slop of 2.这一句求翻译
 
-The `analyzer` can be set to control which analyzer will perform the
-analysis process on the text. It defaults to the field explicit mapping
-definition, or the default search analyzer, for example:
+分析器可以被设置以控制哪个分析器将会执行文本分析过程。它默认为字段显式映射定义，或者默认搜索分析器，
+例如：
 
 [source,js]
 --------------------------------------------------
@@ -40,4 +38,4 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-This query also accepts `zero_terms_query`, as explained in <<query-dsl-match-query, `match` query>>.
+这个查询也接受 `zero_terms_query`，如 <<query-dsl-match-query, `匹配` 查询>> 所述。

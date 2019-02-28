@@ -1,72 +1,50 @@
 [[query-dsl-common-terms-query]]
-=== Common Terms Query
+=== 常用词查询
 
-The `common` terms query is a modern alternative to stopwords which
-improves the precision and recall of search results (by taking stopwords
-into account), without sacrificing performance.
-
-[float]
-==== The problem
-
-Every term in a query has a cost. A search for `"The brown fox"`
-requires three term queries, one for each of `"the"`, `"brown"` and
-`"fox"`, all of which are executed against all documents in the index.
-The query for `"the"` is likely to match many documents and thus has a
-much smaller impact on relevance than the other two terms.
-
-Previously, the solution to this problem was to ignore terms with high
-frequency. By treating `"the"` as a _stopword_, we reduce the index size
-and reduce the number of term queries that need to be executed.
-
-The problem with this approach is that, while stopwords have a small
-impact on relevance, they are still important. If we remove stopwords,
-we lose precision, (eg we are unable to distinguish between `"happy"`
-and `"not happy"`) and we lose recall (eg text like `"The The"` or
-`"To be or not to be"` would simply not exist in the index).
+常用词查询是一种现代的停用词替代方案，它提升了搜索结果的精确度和召回率（通过把停用词考虑进去），
+而不会牺牲性能。
 
 [float]
-==== The solution
+==== 问题
 
-The `common` terms query divides the query terms into two groups: more
-important (ie _low frequency_ terms) and less important (ie _high
-frequency_ terms which would previously have been stopwords).
+查询中的每个词都会有资源消耗。搜索 `"The brown fox"` 需要三个词的查询，
+每个查询分别对应 `"the"`， `"brown"` 和 `"fox"`，所有的这三个查询都会在索引中的所有文档里执行。
+`"the"` 这个词的查询很可能会匹配很多文档，因此它与其他两个词相比，对相关性的影响要小的多。
 
-First it searches for documents which match the more important terms.
-These are the terms which appear in fewer documents and have a greater
-impact on relevance.
+以前，这个问题的解决方案是忽略高频词。通过把 `"the"` 作为一个停用词，来减少索引的大小和词查询的数量。
 
-Then, it executes a second query for the less important terms -- terms
-which appear frequently and have a low impact on relevance. But instead
-of calculating the relevance score for *all* matching documents, it only
-calculates the `_score` for documents already matched by the first
-query. In this way the high frequency terms can improve the relevance
-calculation without paying the cost of poor performance.
-
-If a query consists only of high frequency terms, then a single query is
-executed as an `AND` (conjunction) query, in other words all terms are
-required. Even though each individual term will match many documents,
-the combination of terms narrows down the resultset to only the most
-relevant. The single query can also be executed as an `OR` with a
-specific
-<<query-dsl-minimum-should-match,`minimum_should_match`>>,
-in this case a high enough value should probably be used.
-
-Terms are allocated to the high or low frequency groups based on the
-`cutoff_frequency`, which can be specified as an absolute frequency
-(`>=1`) or as a relative frequency (`0.0 .. 1.0`). (Remember that document
-frequencies are computed on a per shard level as explained in the blog post
-{defguide}/relevance-is-broken.html[Relevance is broken].)
-
-Perhaps the most interesting property of this query is that it adapts to
-domain specific stopwords automatically. For example, on a video hosting
-site, common terms like `"clip"` or `"video"` will automatically behave
-as stopwords without the need to maintain a manual list.
+这种方法的问题在于，虽然停用词对相关性有很小的影响，但是它们仍然重要。如果我们去掉了停用词，
+我们会失去精确度（例如我们无法区分 `"happy"` 和 `"not happy"`），
+并且我们也会失去召回率（例如像 `"The The"` 或者 `"To be or not to be"`
+这样的文本将根本不会存在于索引中）。
 
 [float]
-==== Examples
+==== 解决方案
 
-In this example, words that have a document frequency greater than 0.1%
-(eg `"this"` and `"is"`) will be treated as _common terms_.
+通用词查询会把查询词分成两组：更重要的（即低频词）和不太重要的（即先前已经是停用词的高频词）。
+
+首先，它搜索与更重要的词匹配的文档。这些词在文档中较少出现，对相关性有更大的影响。
+
+然后，它对不太重要的词（频繁出现并且对相关性的影响很小）执行第二个查询。它不计算所有匹配文档的相关性评分，
+而是仅计算第一个查询匹配文档的评分。通过这种方式，高频词可以改善相关性的计算，而且可以节省资源。
+
+如果一个查询都是高频词，那么单个查询会被作为一个 `AND` （连接）查询执行，也就是说，所有的词都是必需的。
+尽管每一个词会匹配很多文档，但是词的组合会将结果集缩小到只有最相关的。
+通过指定 <<query-dsl-minimum-should-match,`minimum_should_match`>> 参数，
+单个查询也可以作为一个 `OR` 查询执行，这种情况下，这个参数应该设置一个足够高的值。
+
+通过 `cutoff_frequency` 参数，来决定把词分配到高频组还是低频组，
+这个参数可以被指定为绝对频率(`>=1`) 或者相对频率 (`0.0 .. 1.0`)。
+（请记住，文档频率是按照每个分片级别计算的，
+如博客文章{defguide}/relevance-is-broken.html[Relevance is broken]中所述。）
+
+也许这类查询最有趣的特性是它可以自动地适应特定领域的停用词。例如，一个视频托管网站，
+像 `"clip"` 或者 `"video"` 这样的常用词将自动地作为停用词，而不需要手动维护一个停用词列表。
+
+[float]
+==== 例子
+
+在这个例子中，文档频率大于0.1%的单词（例如 `"this"` 和 `"is"`）将被视为常用词（ _common terms_）。
 
 [source,js]
 --------------------------------------------------
@@ -84,13 +62,11 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-The number of terms which should match can be controlled with the
-<<query-dsl-minimum-should-match,`minimum_should_match`>>
-(`high_freq`, `low_freq`), `low_freq_operator` (default `"or"`) and
-`high_freq_operator` (default `"or"`) parameters.
+通过 <<query-dsl-minimum-should-match,`minimum_should_match`>>（`high_freq`, `low_freq`），
+ `low_freq_operator` （默认 `"or"`）和 `high_freq_operator`（默认 `"or"`） 参数，
+ 可以控制应该匹配的词的数量。
 
-For low frequency terms, set the `low_freq_operator` to `"and"` to make
-all terms required:
+对于低频词，把 `low_freq_operator` 设置为 `"and"` ，则所有的词都是必需的：
 
 [source,js]
 --------------------------------------------------
@@ -109,7 +85,7 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-which is roughly equivalent to:
+这等同于：
 
 [source,js]
 --------------------------------------------------
@@ -133,10 +109,9 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-Alternatively use
+或者使用
 <<query-dsl-minimum-should-match,`minimum_should_match`>>
-to specify a minimum number or percentage of low frequency terms which
-must be present, for instance:
+来指定一个低频词必需存在的最小数量或者百分比，例如：
 
 [source,js]
 --------------------------------------------------
@@ -155,7 +130,7 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-which is roughly equivalent to:
+这等同于：
 
 [source,js]
 --------------------------------------------------
@@ -184,11 +159,10 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-A different
-<<query-dsl-minimum-should-match,`minimum_should_match`>>
-can be applied for low and high frequency terms with the additional
-`low_freq` and `high_freq` parameters. Here is an example when providing
-additional parameters (note the change in structure):
+minimum_should_match
+
+通过使用附加的 `low_freq` 和 `high_freq` 参数，
+可以让低频词和高频词使用不同的参数。以下是提供附加参数的例子（注意结构的变化）：
 
 [source,js]
 --------------------------------------------------
@@ -210,7 +184,7 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-which is roughly equivalent to:
+这等同于：
 
 [source,js]
 --------------------------------------------------
@@ -245,11 +219,9 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-In this case it means the high frequency terms have only an impact on
-relevance when there are at least three of them. But the most
-interesting use of the
+在这种情况下，这意味着至少有三个高频词时，高频词才会对相关性有影响。但是对于高频词来说，
 <<query-dsl-minimum-should-match,`minimum_should_match`>>
-for high frequency terms is when there are only high frequency terms:
+最有趣的用法是当只有高频词时：
 
 [source,js]
 --------------------------------------------------
@@ -271,7 +243,7 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-which is roughly equivalent to:
+这等同于：
 
 [source,js]
 --------------------------------------------------
@@ -292,8 +264,6 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-The high frequency generated query is then slightly less restrictive
-than with an `AND`.
+高频词生成的查询比使用 `AND` 查询的限制要稍微少一些。
 
-The `common` terms query also supports `boost` and `analyzer` as
-parameters.
+常用词查询也支持 `boost` 和 `analyzer` 作为参数。

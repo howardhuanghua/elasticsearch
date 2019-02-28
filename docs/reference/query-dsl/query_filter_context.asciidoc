@@ -1,49 +1,46 @@
 [[query-filter-context]]
-== Query and filter context
+== 查询上下文和过滤上下文
 
-The behaviour of a query clause depends on whether it is used in _query context_ or
-in _filter context_:
+查询子句的行为取决于它是在查询上下文中使用，还是在过滤上下文中使用：
 
-Query context::
+查询上下文::
 +
 --
-A query clause used in query context answers the question ``__How well does this
-document match this query clause?__'' Besides deciding whether or not the
-document matches, the query clause also calculates a `_score` representing how
-well the document matches, relative to other documents.
 
-Query context is in effect whenever a query clause is passed to a `query` parameter,
-such as the `query` parameter in the <<search-request-query,`search`>> API.
+一个查询子句在查询上下文中被使用时，能够解答这个文档和查询子句的匹配程度是怎样的？
+除了决定文档是否匹配，还会计算一个评分，来代表与其他文档比起来，这个文档的匹配程度。
+
+只要查询子句传入一个查询参数（例如 <<search-request-query,`search`>> API 中的查询参数），
+查询上下文就会生效。
 --
 
-Filter context::
+过滤上下文::
 +
 --
-In _filter_ context, a query clause answers the question ``__Does this document
-match this query clause?__''  The answer is a simple Yes or No -- no scores are
-calculated.  Filter context is mostly used for filtering structured data, e.g.
 
-*  __Does this +timestamp+ fall into the range 2015 to 2016?__
-*  __Is the +status+  field set to ++"published"++__?
+在过滤上下文中，一个查询子句是用来回答 ``这个文档匹配这个查询子句吗？'' 这种问题的，
+这个答案是一个简单的 ‘是’ 或者 ’不是’ ，没有评分会被计算。过滤上下文大多的被用来过滤结构化的数据，
+比如下面：
 
-Frequently used filters will be cached automatically by Elasticsearch, to
-speed up performance.
+*  这个时间戳是否在2015到2016区间内？
+*  status 字段是否被设置为 "published" ？
 
-Filter context is in effect whenever a query clause is passed to a `filter`
-parameter, such as the `filter` or `must_not` parameters in the
-<<query-dsl-bool-query,`bool`>> query, the `filter` parameter in the
-<<query-dsl-constant-score-query,`constant_score`>> query, or the
-<<search-aggregations-bucket-filter-aggregation,`filter`>> aggregation.
+频繁被使用的过滤上下文将会被 Elasticsearch 自动的缓存，以提升性能。
+
+只要查询子句传入 `filter` 参数（例如 <<query-dsl-bool-query,`bool`>> 查询中的 `filter`
+参数或 `must_not` 参数，<<query-dsl-constant-score-query,`constant_score`>> 查询中的 `filter`
+参数，或者聚合中的 <<search-aggregations-bucket-filter-aggregation,`filter`>>），
+过滤上下文就会生效。
+
 --
 
-Below is an example of query clauses being used in query and filter context
-in the `search` API.  This query will match documents where all of the following
-conditions are met:
+下面是一个 `search` API 中，查询子句被使用在查询上下文和过滤上下文中的例子。
+这个查询会匹配满足下面所有条件的文档：
 
-* The `title` field contains the word `search`.
-* The `content` field contains the word `elasticsearch`.
-* The `status` field contains the exact word `published`.
-* The `publish_date` field contains a date from 1 Jan 2015 onwards.
+* `title` 字段包含单词 `search` 。
+* `content` 字段包含单词 `elasticsearch` 。
+* `status` 字段包含完整的单词 `published` 。
+* `publish_date` 日期字段范围大于等于2015年1月1日。
 
 [source,js]
 ------------------------------------
@@ -64,15 +61,10 @@ GET /_search
 }
 ------------------------------------
 // CONSOLE
-<1> The `query` parameter indicates query context.
-<2> The `bool` and two `match` clauses are used in query context,
-    which means that they are used to score how well each document
-    matches.
-<3> The `filter` parameter indicates filter context.
-<4> The `term` and `range` clauses are used in filter context.
-    They will filter out documents which do not match, but they will
-    not affect the score for matching documents.
+<1> `query` 参数指明这是查询上下文。
+<2> `bool` 和两个 `match` 子句被使用在查询上下文中，这意味着他们会被用来给每个文档的匹配程度计算评分。
+<3> `filter` 参数指明这是过滤上下文。
+<4> `term` 和 `range` 子句被使用在过滤上下文中。它们将会过滤掉不满足它们条件的文档，但是它们不会影响文档的评分。
 
-TIP: Use query clauses in query context for conditions which should affect the
-score of matching documents (i.e. how well does the document match), and use
-all other query clauses in filter context.
+TIP: 当关注影响匹配文档的评分（即，文档的匹配程度）的条件时，
+使用查询上下文，其他情况使用过滤上下文。

@@ -1,70 +1,61 @@
 [[query-string-syntax]]
 
-==== Query string syntax
+==== 查询字符串语法
 
-The query string ``mini-language'' is used by the
-<<query-dsl-query-string-query>> and by the
-`q` query string parameter in the <<search-search,`search` API>>.
+在 <<search-search,`search` API>> 中被用于 <<query-dsl-query-string-query>>
+和 `q` 查询字符串参数的 ``微型语言'' 。
 
-The query string is parsed into a series of _terms_ and _operators_. A
-term can be a single word -- `quick` or `brown` -- or a phrase, surrounded by
-double quotes -- `"quick brown"` -- which searches for all the words in the
-phrase, in the same order.
+查询字符串被解析成一系列的词和运算符。一个词可以是单个的词 -- `quick` 或者 `brown` --
+或者一个被双引号括起来的短语 -- `"quick brown"` ，这会以短语中单词的顺序搜索所有的单词。
 
-Operators allow you to customize the search -- the available options are
-explained below.
+允许自定义搜索 -- 可用的选项说明如下。
 
-===== Field names
+===== 字段名
 
-As mentioned in <<query-dsl-query-string-query>>, the `default_field` is searched for the
-search terms, but it is possible to specify other fields in the query syntax:
+如 <<query-dsl-query-string-query>> 所述， `default_field` 会作为搜索词被搜索，
+但可以在查询语法中指定其他字段：
 
-* where the `status` field contains `active`
+* 这里 `status` 字段包含 `active`
 
     status:active
 
-* where the `title` field contains `quick` or `brown`.
-  If you omit the OR operator the default operator will be used
+* 这里 `title` 字段包含 `quick` 或者 `brown` 。如果省略OR运算符，将使用默认运算符
 
     title:(quick OR brown)
     title:(quick brown)
 
-* where the `author` field contains the exact phrase `"john smith"`
+* 这里 `author` 字段包含精确短语 `"john smith"`
 
     author:"John Smith"
 
-* where any of the fields `book.title`, `book.content` or `book.date` contains
-  `quick` or `brown` (note how we need to escape the `*` with a backslash):
+* 这里字段 `book.title`， `book.content` 或者 `book.date` 都包含 `quick` 或者 `brown` （
+注意我们需要使用反斜杠来转义 `*` ）：
 
     book.\*:(quick brown)
 
-* where the field `title` has any non-null value:
+* 这里字段 `title` 有非空值：
 
     _exists_:title
 
-===== Wildcards
+===== 通配符
 
-Wildcard searches can be run on individual terms, using `?` to replace
-a single character, and `*` to replace zero or more characters:
+通配符搜索能够在单个词上运行，使用 `?` 代替一个单个字符，使用 `*` 代替0个或更多个字符：
 
     qu?ck bro*
 
-Be aware that wildcard queries can use an enormous amount of memory and
-perform very badly -- just think how many terms need to be queried to
-match the query string `"a* b* c*"`.
+请注意，通配符查询可能会使用大量的内存，并且运行的非常糟糕，
+想一想需要查询多少个词来匹配查询字符串 `"a* b* c*"`。
 
 [WARNING]
 =======
-Pure wildcards `\*` are rewritten to <<query-dsl-exists-query,`exists`>> queries for efficiency.
-As a consequence, the wildcard `"field:*"` would match documents with an empty value
- like the following:
+为了提高效率，纯通配符 `\*` 被重写为 <<query-dsl-exists-query,`exists`>> 查询。
+ 因此，通配符 `"field:*"` 将会匹配具有空值的文档，如下所示：
 ```
 {
   "field": ""
 }
 ```
-\... and would **not** match if the field is missing or set with an explicit null
-value like the following:
+\... 如果字段不存在或者设置一个显式的null值，则不会匹配，如下所示：
 ```
 {
   "field": null
@@ -74,111 +65,92 @@ value like the following:
 
 [WARNING]
 =======
-Allowing a wildcard at the beginning of a word (eg `"*ing"`) is particularly
-heavy, because all terms in the index need to be examined, just in case
-they match.  Leading wildcards can be disabled by setting
-`allow_leading_wildcard` to `false`.
+在单词的开头允许使用通配符（例如 `"*ing"`）特别重，因为索引中的所有词都需要检查，以防止他们匹配。
+通过设置 `allow_leading_wildcard` 为 `false` 可以将前导通配符禁用。
 =======
 
-Only parts of the analysis chain that operate at the character level are
-applied. So for instance, if the analyzer performs both lowercasing and
-stemming, only the lowercasing will be applied: it would be wrong to perform
-stemming on a word that is missing some of its letters.
+仅应用在字符级别操作分析链的部分。因此，如果分析器执行小写和词干分析，则只应用小写：
+对缺少某些字母的单词执行词干分析会是错误的。
 
-By setting `analyze_wildcard` to true, queries that end with a `*` will be
-analyzed and a boolean query will be built out of the different tokens, by
-ensuring exact matches on the first N-1 tokens, and prefix match on the last
-token.
+通过将 `analyze_wildcard` 设置为真，将分析以 `*` 结尾的查询，
+并通过确保第一个N-1标记的精确匹配以及最后一个标记的前缀匹配，从不同的标记构建一个布尔查询。
 
-===== Regular expressions
+===== 正则表达式
 
-Regular expression patterns can be embedded in the query string by
-wrapping them in forward-slashes (`"/"`):
+正则表达式模式可以通过将它们包装在正斜杠（`"/"`）中来嵌入查询字符串中：
 
     name:/joh?n(ath[oa]n)/
 
-The supported regular expression syntax is explained in <<regexp-syntax>>.
+正则表达式支持的语法在 <<regexp-syntax>> 中有解释。
 
 [WARNING]
 =======
-The `allow_leading_wildcard` parameter does not have any control over
-regular expressions.  A query string such as the following would force
-Elasticsearch to visit every term in the index:
+`allow_leading_wildcard` 参数对正则表达式没有任何控制权。
+下面的查询字符串将会强制Elasticsearch访问索引中每个词：
 
     /.*n/
 
-Use with caution!
+谨慎使用！
 =======
 
-===== Fuzziness
+===== 模糊
 
-We can search for terms that are
-similar to, but not exactly like our search terms, using the ``fuzzy''
-operator:
+我们可以使用 ``fuzzy'' 运算符搜索与我们的搜索词相似但不完全相同的词：
 
     quikc~ brwn~ foks~
 
-This uses the
+这将使用
 http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance[Damerau-Levenshtein distance]
-to find all terms with a maximum of
-two changes, where a change is the insertion, deletion
-or substitution of a single character, or transposition of two adjacent
-characters.
+查找最多有两个变化的所有词，其中一个变化是插入，删除或者单个字符的替换，或者两个相邻字符的换位。
 
-The default _edit distance_ is `2`, but an edit distance of `1` should be
-sufficient to catch 80% of all human misspellings. It can be specified as:
+默认的编辑距离是 `2`，但编辑距离为1应足以捕获人为拼写错误的80%。它可以指定为：
 
     quikc~1
 
-===== Proximity searches
+===== 邻近搜索
 
-While a phrase query (eg `"john smith"`) expects all of the terms in exactly
-the same order, a proximity query allows the specified words to be further
-apart or in a different order.  In the same way that fuzzy queries can
-specify a maximum edit distance for characters in a word, a proximity search
-allows us to specify a maximum edit distance of words in a phrase:
+虽然一个短语查询（例如：`"john smith"`）期望所有的词有完全相同的顺序，
+但是一个邻近查询允许单词可以相隔的更远或者不同的顺序。
+正如模糊查询可以为单词中的字符指定最大编辑距离一样，邻近搜索允许指定短语中单词的最大编辑距离：
 
     "fox quick"~5
 
-The closer the text in a field is to the original order specified in the
-query string, the more relevant that document is considered to be. When
-compared to the above example query, the phrase `"quick fox"` would be
-considered more relevant than `"quick brown fox"`.
+字段中的文本越接近查询字符串中指定的原始顺序，该文档就越相关。与上面的查询示例相比，
+短语 `"quick fox"` 比 `"quick brown fox"` 更相关。
 
-===== Ranges
+===== 范围
 
-Ranges can be specified for date, numeric or string fields. Inclusive ranges
-are specified with square brackets `[min TO max]` and exclusive ranges with
-curly brackets `{min TO max}`.
+可以为日期，数字或者字符串字段指定范围。包含范围用方括号 `[min TO max]` ，
+不包含范围用大括号 `{min TO max}`。
 
-* All days in 2012:
+* 2012所有的天：
 
     date:[2012-01-01 TO 2012-12-31]
 
-* Numbers 1..5
+* 数字 1..5
 
     count:[1 TO 5]
 
-* Tags between `alpha` and `omega`, excluding `alpha` and `omega`:
+* `alpha` 和 `omega` 之间的标签，不包含 `alpha` 和 `omega`：
 
     tag:{alpha TO omega}
 
-* Numbers from 10 upwards
+* 10以上的数
 
     count:[10 TO *]
 
-* Dates before 2012
+* 2012之前的日期
 
     date:{* TO 2012-01-01}
 
-Curly and square brackets can be combined:
+大括号和方括号可以组合：
 
-* Numbers from 1 up to but not including 5
+* 数字从1到5但不包括5
 
     count:[1 TO 5}
 
 
-Ranges with one side unbounded can use the following syntax:
+一边无边界的范围可以使用下面的语法：
 
     age:>10
     age:>=10
@@ -187,66 +159,56 @@ Ranges with one side unbounded can use the following syntax:
 
 [NOTE]
 ====================================================================
-To combine an upper and lower bound with the simplified syntax, you
-would need to join two clauses with an `AND` operator:
+用简化语法组合一个上限和下限，你需要使用 `AND` 运算符连接两个子句：
 
     age:(>=10 AND <20)
     age:(+>=10 +<20)
 
 ====================================================================
 
-The parsing of ranges in query strings can be complex and error prone. It is
-much more reliable to use an explicit <<query-dsl-range-query,`range` query>>.
+查询字符串的范围解析可能很复杂且容易出错。
+使用显式的 <<query-dsl-range-query,`范围` 查询>>更可靠。
 
+===== 提升
 
-===== Boosting
-
-Use the _boost_ operator `^` to make one term more relevant than another.
-For instance, if we want to find all documents about foxes, but we are
-especially interested in quick foxes:
+使用提升运算符 `^` 让一个词比另一个词更相关。例如，如果我们想查找关于foxes的所有文档，
+但是我们对quick foxes特别感兴趣：
 
     quick^2 fox
 
-The default `boost` value is 1, but can be any positive floating point number.
-Boosts between 0 and 1 reduce relevance.
+默认的 `boost` 值是1，但可以是任何正浮点数。在0和1之间会降低相关性。
 
-Boosts can also be applied to phrases or to groups:
+提升也可以应用于短语或者群组：
 
     "john smith"^2   (foo bar)^4
 
-===== Boolean operators
+===== 布尔运算符
 
-By default, all terms are optional, as long as one term matches.  A search
-for `foo bar baz` will find any document that contains one or more of
-`foo` or `bar` or `baz`.  We have already discussed the `default_operator`
-above which allows you to force all terms to be required, but there are
-also _boolean operators_ which can be used in the query string itself
-to provide more control.
+默认情况下，只要一个词匹配，所有词都是可选的。
+搜索 `foo bar baz` 将找到包含一个或者多个 `foo` 或者 `bar` 或者 `baz` 的任何文档。
+我们已经讨论了上面的 `default_operator`，它允许你强制所有词是必须的，
+但也可以在查询字符串本身使用布尔运算符来提供更多的控制。
 
-The preferred operators are `+` (this term *must* be present) and `-`
-(this term *must not* be present). All other terms are optional.
-For example, this query:
+首选运算符是 `+` （这个词必须存在）和 `-` （这个词必须不存在）。所有其他词都是可选的。
+例如，这个查询：
 
     quick brown +fox -news
 
-states that:
+说明：
 
-* `fox` must be present
-* `news` must not be present
-* `quick` and `brown` are optional -- their presence increases the relevance
+* `fox` 必须存在
+* `news` 一定不存在
+* `quick` 和 `brown` 是可选的 -- 它们的存在增加了相关性
 
-The familiar boolean operators `AND`, `OR` and `NOT` (also written `&&`, `||`
-and `!`) are also supported but beware that they do not honor the usual
-precedence rules, so parentheses should be used whenever multiple operators are
-used together. For instance the previous query could be rewritten as:
+也支持熟悉的布尔运算符 `AND`， `OR` 和 `NOT` （也写成 `&&`， `||` 和 `!`），
+但是要注意它们不遵循通常的优先级规则，所以每当多个运算符一起使用时，应该使用括号。
+例如上一个查询可以重写为：
 
 `((quick AND fox) OR (brown AND fox) OR fox) AND NOT news`::
 
-This form now replicates the logic from the original query correctly, but
-the relevance scoring bears little resemblance to the original.
+这个语句现在可以正确地复制原始查询的逻辑，但是相关性评分与原始查询几乎没有相似之处。
 
-In contrast, the same query rewritten using the <<query-dsl-match-query,`match` query>>
-would look like this:
+相比之下，使用 <<query-dsl-match-query,`match` 查询>> 重写的相同查询，如下所示：
 
     {
         "bool": {
@@ -257,35 +219,27 @@ would look like this:
     }
 
 
-===== Grouping
+===== 分组
 
-Multiple terms or clauses can be grouped together with parentheses, to form
-sub-queries:
+可以将多个词或者子句与括号组合在一起，以形成子查询：
 
     (quick OR brown) AND fox
 
-Groups can be used to target a particular field, or to boost the result
-of a sub-query:
+组可用于指定一个特定字段，或者提升子查询的结果：
 
     status:(active OR pending) title:(full text search)^2
 
-===== Reserved characters
+===== 保留字符
 
-If you need to use any of the characters which function as operators in your
-query itself (and not as operators), then you should escape them with
-a leading backslash. For instance, to search for `(1+1)=2`, you would
-need to write your query as `\(1\+1\)\=2`.
+如果你需要在查询本身中使用任何作为运算符的字符（而不是运算符），那么你应该使用前导反斜杠转义它们。
+例如，搜索 `(1+1)=2`，你需要把查询写成 `\(1\+1\)\=2`。
 
-The reserved characters are:  `+ - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /`
+保留字符是：  `+ - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /`
 
-Failing to escape these special characters correctly could lead to a syntax
-error which prevents your query from running.
+无法正确转义这些特殊字符的话会导致语法错误，从而阻止查询的运行。
 
-NOTE: `<` and `>` can't be escaped at all. The only way to prevent them from
-attempting to create a range query is to remove them from the query string
-entirely.
+NOTE: `<` 和 `>` 无法转义。唯一阻止它们运行范围查询的办法是从查询字符串中完全地删除它们。
 
-===== Empty Query
+===== 空查询
 
-If the query string is empty or only contains whitespaces the query will
-yield an empty result set.
+如果查询字符串是空的或者只包含空格，查询将生成一个空的结果集。

@@ -1,44 +1,40 @@
 [[full-text-queries]]
 == Full text queries
 
-The high-level full text queries are usually used for running full text
-queries on full text fields like the body of an email. They understand how the
-field being queried is <<analysis,analyzed>> and will apply each field's
-`analyzer` (or `search_analyzer`) to the query string before executing.
+高级的全文查询通常在全文本的场景使用，如电子邮件的正文。
+他们明白正在被查询的字段是怎么被分析（ <<analysis,analyzed>> ）的，
+并且在执行前将每一个字段的 `分析器` （或者 `搜索_分析器` ）应用到查询字符串。
 
-The queries in this group are:
+属于全文查询的是：
 
-<<query-dsl-match-query,`match` query>>::
+<<query-dsl-match-query,`匹配` 查询>>::
 
-    The standard query for performing full text queries, including fuzzy matching
-    and phrase or proximity queries.
+    标准的全文查询，包括模糊匹配和短语或者近似查询。
 
-<<query-dsl-match-query-phrase,`match_phrase` query>>::
+<<query-dsl-match-query-phrase,`匹配短语` 查询>>::
 
-    Like the `match` query but used for matching exact phrases or word proximity matches.
-    
-<<query-dsl-match-query-phrase-prefix,`match_phrase_prefix` query>>::
+    与 `match` 查询类似，但是用于匹配精确短语或单词近似匹配。
 
-    The poor man's _search-as-you-type_.  Like the `match_phrase` query, but does a wildcard search on the final word.
-    
-<<query-dsl-multi-match-query,`multi_match` query>>::
+<<query-dsl-match-query-phrase-prefix,`匹配短语前缀` 查询>>::
 
-    The multi-field version of the `match` query.
+    与 `match_phrase` 查询类似，但是会对最后一个单词做通配符的搜索。
 
-<<query-dsl-common-terms-query,`common` terms query>>::
+<<query-dsl-multi-match-query,`多匹配` 查询>>::
 
-    A more specialized query which gives more preference to uncommon words.
+     `match` 查询的多字段版本。
 
-<<query-dsl-query-string-query,`query_string` query>>::
+<<query-dsl-common-terms-query,`常见` 词查询>>::
 
-    Supports the compact Lucene <<query-string-syntax,query string syntax>>,
-    allowing you to specify AND|OR|NOT conditions and multi-field search
-    within a single query string. For expert users only.
+    一个更专业的查询，它更多地优先考虑不常见的词。
 
-<<query-dsl-simple-query-string-query,`simple_query_string` query>>::
+<<query-dsl-query-string-query,`查询字符串` 查询>>::
 
-    A simpler, more robust version of the `query_string` syntax suitable
-    for exposing directly to users.
+    支持简洁的 Lucene 查询字符串语法 <<query-string-syntax,query string syntax>> ，
+    在一个查询字符串中允许你指定 AND|OR|NOT 条件和多字段查询。仅供专家用户使用。
+
+<<query-dsl-simple-query-string-query,`简单查询字符串` 查询>>::
+
+    一个适合直接暴露给用户的、简单的、更加健壮的 `query_string` 语法版本。
 
 include::match-query.asciidoc[]
 

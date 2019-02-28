@@ -1,8 +1,8 @@
 [[query-dsl-match-query-phrase-prefix]]
-=== Match Phrase Prefix Query
+=== 匹配短语前缀查询
 
-The `match_phrase_prefix` is the same as `match_phrase`, except that it
-allows for prefix matches on the last term in the text. For example:
+`match_phrase_prefix` 和 `match_phrase` 相同，除了它允许对文本的最后一个词做前缀匹配外。
+例如：
 
 [source,js]
 --------------------------------------------------
@@ -17,11 +17,14 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-It accepts the same parameters as the phrase type. In addition, it also
-accepts a `max_expansions` parameter (default `50`) that can control to how
-many suffixes the last term will be expanded. It is highly recommended to set
-it to an acceptable value to control the execution time of the query. For
-example:
+它接受和短语查询一样的参数。此外，它也接受一个 `max_expansions` 参数（默认 `50`），
+可以控制最后一个词做前缀匹配的数量。强烈建议设置一个合理的值以控制查询的执行时间。
+
+译者注：prefix 查询存在严重的资源消耗问题，短语查询的这种方式也同样如此。
+前缀可能会匹配成千上万的词，这不仅会消耗很多系统资源，而且结果的用处也不大。
+所以 `max_expansions` 参数强烈建议设置。
+
+例如：
 
 [source,js]
 --------------------------------------------------
@@ -42,23 +45,16 @@ GET /_search
 [IMPORTANT]
 ===================================================
 
-The `match_phrase_prefix` query is a poor-man's autocomplete.  It is very easy
-to use, which lets you get started quickly with _search-as-you-type_ but its
-results, which usually are good enough,  can sometimes be confusing.
+`match_phrase_prefix` 查询是一个 poor-man's 自动完成。它非常容易使用，
+让你使用即时搜索来快速开始，它的结果通过是足够好的，有时候也会令人困惑。
 
-Consider the query string `quick brown f`.  This query works by creating a
-phrase query out of `quick` and `brown` (i.e. the term `quick` must exist and
-must be followed by the term `brown`).  Then it looks at the sorted term
-dictionary to find the first 50 terms that begin with `f`, and
-adds these terms to the phrase query.
+考虑查询字符串 `quick brown f`。这个查询用 `quick` 和 `brown`
+（即单词 `quick` 必须存在并且必须紧跟着单词 `brown`）创建一个短语查询。然后它搜索以 `f`
+开头按字典排序的前50个单词，并且把这些单词添加到短语查询中。
 
-The problem is that the first 50 terms may not include the term `fox` so the
-phrase `quick brown fox` will not be found.  This usually isn't a problem as
-the user will continue to type more letters until the word they are looking
-for appears.
+问题是前50个单词可能不包含单词 `fox` ，所以短语 `quick brown fox` 将不会被找到。
+这通常不是问题，随着用户输入更多的字符，直到他们搜索的词出现。
 
-For better solutions for _search-as-you-type_ see the
-<<search-suggesters-completion,completion suggester>> and
-{defguide}/_index_time_search_as_you_type.html[Index-Time Search-as-You-Type].
-
+对于即时搜索更好的解决方案，看 <<search-suggesters-completion,completion suggester>> 和
+{defguide}/_index_time_search_as_you_type.html[Index-Time Search-as-You-Type]。
 ===================================================

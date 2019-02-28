@@ -1,9 +1,7 @@
 [[query-dsl-match-query]]
-=== Match Query
+=== 匹配查询
 
-
-`match` queries accept text/numerics/dates, analyzes
-them, and constructs a query. For example:
+`match` 查询接受文本/数值/日期，分析他们并构造一个查询。例如：
 
 [source,js]
 --------------------------------------------------
@@ -18,46 +16,34 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-Note, `message` is the name of a field, you can substitute the name of
-any field instead.
+注意， `message` 是一个字段的名字，你能够用任意字段的名字替代它。
 
 [[query-dsl-match-query-boolean]]
-==== match
+==== 匹配
 
-The `match` query is of type `boolean`. It means that the text
-provided is analyzed and the analysis process constructs a boolean query
-from the provided text. The `operator` flag can be set to `or` or `and`
-to control the boolean clauses (defaults to `or`). The minimum number of
-optional `should` clauses to match can be set using the
-<<query-dsl-minimum-should-match,`minimum_should_match`>>
-parameter.
+`match` 查询是 `boolean` 类型的。这意味着文本会被分析，并且分析过程会根据提供的文本构建一个布尔查询。
+  `operator` 标志可以设置 `or` 或者 `and` 来控制布尔子句（默认为 `or`）。
+匹配 `should` 子句的最小数量是可选的，可以通过 <<query-dsl-minimum-should-match,`minimum_should_match`>>
+参数设置。
 
-The `analyzer` can be set to control which analyzer will perform the
-analysis process on the text. It defaults to the field explicit mapping
-definition, or the default search analyzer.
+`analyzer` 可以被设置以控制那个分析器将会执行文本的分析过程。
 
-The `lenient` parameter can be set to `true` to ignore exceptions caused by
-data-type mismatches,  such as trying to query a numeric field with a text
-query string. Defaults to `false`.
+`lenient` 参数可以设置为 `true` 来忽略由于数据类型不匹配导致的异常，
+ 比如尝试用一个文本字符串查询一个数字字段。 `lenient` 参数默认是 `false`。
 
 [[query-dsl-match-query-fuzziness]]
-===== Fuzziness
+===== 模糊
 
-`fuzziness` allows _fuzzy matching_ based on the type of field being queried.
-See <<fuzziness>> for allowed settings.
+`fuzziness` 允许基于被查询的字段的类型模糊匹配。有关被允许的设置，请看 <<fuzziness>> 。
 
-The `prefix_length` and
-`max_expansions` can be set in this case to control the fuzzy process.
-If the fuzzy option is set the query will use `top_terms_blended_freqs_${max_expansions}`
-as its <<query-dsl-multi-term-rewrite,rewrite
-method>> the `fuzzy_rewrite` parameter allows to control how the query will get
-rewritten.
+在这种情况下，可以设置 `prefix_length` 和 `max_expansions` 来控制模糊过程。
+如果设置了模糊选项，查询将会使用 `top_terms_blended_freqs_${max_expansions}` 作为它的 <<query-dsl-multi-term-rewrite,rewrite
+method>> ， `fuzzy_rewrite` 参数允许控制查询将如何重写。
 
-Fuzzy transpositions (`ab` -> `ba`) are allowed by default but can be disabled
-by setting `fuzzy_transpositions` to `false`.
+默认情况下允许模糊转换 (`ab` -> `ba`) ，但可以通过设置 `fuzzy_transpositions` 为 `false`
+来禁用。
 
-Here is an example when providing additional parameters (note the slight
-change in structure, `message` is the field name):
+下面是一个提供附加参数的例子（注意结构稍有变化， `message` 是字段的名称）：
 
 [source,js]
 --------------------------------------------------
@@ -77,10 +63,9 @@ GET /_search
 
 [[query-dsl-match-query-zero]]
 ===== Zero terms query
-If the analyzer used removes all tokens in a query like a `stop` filter
-does, the default behavior is to match no documents at all. In order to
-change that the `zero_terms_query` option can be used, which accepts
-`none` (default) and `all` which corresponds to a `match_all` query.
+
+如果使用的分析器删除了查询中的所有令牌，就像 `stop` 过滤器做的那样，默认的行为是不会匹配到任何文档。
+为了改变 `zero_terms_query` 选项可以被使用，它接受`none` （默认）和 `all` （相当于一个 `match_all` 查询）。
 
 [source,js]
 --------------------------------------------------
@@ -100,28 +85,22 @@ GET /_search
 // CONSOLE
 
 [[query-dsl-match-query-cutoff]]
-===== Cutoff frequency
+===== 截止频率
 
-The match query supports a `cutoff_frequency` that allows
-specifying an absolute or relative document frequency where high
-frequency terms are moved into an optional subquery and are only scored
-if one of the low frequency (below the cutoff) terms in the case of an
-`or` operator or all of the low frequency terms in the case of an `and`
-operator match.
+match 查询支持 `cutoff_frequency` ，它允许指定一个绝对的或者相对的文档频率，
+其中高频词会被移动到一个可选的子查询中，并且如果是 `or`
+操作的低频词（低于指定的频率）中有一个匹配或者 `and`
+操作的低频词的所有都匹配才会计算评分。
 
-This query allows handling `stopwords` dynamically at runtime, is domain
-independent and doesn't require a stopword file. It prevents scoring /
-iterating high frequency terms and only takes the terms into account if a
-more significant / lower frequency term matches a document. Yet, if all
-of the query terms are above the given `cutoff_frequency` the query is
-automatically transformed into a pure conjunction (`and`) query to
-ensure fast execution.
+这个查询允许在运行时动态的处理 `stopwords` ，它是领域独立的，并且不需要停止词文件。
+它防止对高频词计算评分或者迭代，并且如果更有意义或者更低频的词匹配文档的情况下，则只考虑这些词。
+还有，如果所有的查询关键词的频度都比给定的  `cutoff_frequency` 高的话，
+查询将自动地转换为纯联合（`and`）查询，以确保快速的执行。
 
-The `cutoff_frequency` can either be relative to the total number of
-documents if in the range `[0..1)` or absolute if greater or equal to
-`1.0`.
+如果在 `[0..1)` 范围内， 则 `cutoff_frequency` 指的是相对于文档总数的比例，如果大于或者等于 `1.0`
+，则 `cutoff_frequency` 指的是绝对的文档数量。
 
-Here is an example showing a query composed of stopwords exclusively:
+下面是一个仅由停止词组成的查询的例子：
 
 [source,js]
 --------------------------------------------------
@@ -139,20 +118,19 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-IMPORTANT: The `cutoff_frequency` option operates on a per-shard-level. This means
-that when trying it out on test indexes with low document numbers you
-should follow the advice in {defguide}/relevance-is-broken.html[Relevance is broken].
+IMPORTANT: `cutoff_frequency` 选项以 per-shard-level 来运行。这意味着当尝试用低文档号测试索引时，
+ 你应该遵守 {defguide}/relevance-is-broken.html[Relevance is broken] 的建议。
 
 [[query-dsl-match-query-synonyms]]
-===== Synonyms
+===== 同义词
 
-The `match` query supports multi-terms synonym expansion with the <<analysis-synonym-graph-tokenfilter,
-synonym_graph>> token filter. When this filter is used, the parser creates a phrase query for each multi-terms synonyms.
-For example, the following synonym: `"ny, new york" would produce:`
+`match` 查询使用 <<analysis-synonym-graph-tokenfilter,synonym_graph>>
+ 令牌过滤器来支持 multi-terms 同义词扩展。当使用这个过滤器的时候，解析器将为每一个 multi-terms 同义词创建一个短语查询。
+ 例如，下面的同义词：`"ny, new york" 将会产生:`
 
 `(ny OR ("new york"))`
 
-It is also possible to match multi terms synonyms with conjunctions instead:
+它也可能使用连词来替代匹配多条件的同义词：
 
 [source,js]
 --------------------------------------------------
@@ -170,24 +148,16 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-The example above creates a boolean query:
+上面的例子创建了一个布尔查询：
 
 `(ny OR (new AND york)) city`
 
-that matches documents with the term `ny` or the conjunction `new AND york`.
-By default the parameter `auto_generate_synonyms_phrase_query` is set to `true`.
+这会使用单词 `ny` 或者 连词 `new AND york` 匹配文档。默认情况下，
+参数 `auto_generate_synonyms_phrase_query` 被设置为 `true`。
 
-
-.Comparison to query_string / field
+.与 query_string / field 的比较
 **************************************************
-
-The match family of queries does not go through a "query parsing"
-process. It does not support field name prefixes, wildcard characters,
-or other "advanced" features. For this reason, chances of it failing are
-very small / non existent, and it provides an excellent behavior when it
-comes to just analyze and run that text as a query behavior (which is
-usually what a text search box does). Also, the `phrase_prefix` type can
-provide a great "as you type" behavior to automatically load search
-results.
-
+match 的查询系列不会经过 “查询分析” 过程。它不支持字段名称前缀，通配符字符，或者其他的 ”高级” 特征。
+基于这个原因，它失败的机会很小/不存在，并且当它只分析和运行一个查询行为的文本（通常是一个文本搜索框）时，
+它提供了一个出色的行为。另外， `phrase_prefix` 类型可以提供一个很棒的 “即时” 行为来自动的加载搜索结果。
 **************************************************

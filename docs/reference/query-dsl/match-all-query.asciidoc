@@ -1,13 +1,11 @@
 [[query-dsl-match-all-query]]
-== Match All Query
+== 全匹配查询
 
-The most simple query, which matches all documents, giving them all a `_score`
-of `1.0`.
-
+这是最简单的查询，它会匹配所有的文档，并给所有这些文档 `1.0` 的评分。
 [source,js]
 --------------------------------------------------
 GET /_search
-{ 
+{
     "query": {
         "match_all": {}
     }
@@ -15,8 +13,7 @@ GET /_search
 --------------------------------------------------
 // CONSOLE
 
-The `_score` can be changed with the `boost` parameter:
-
+评分能被 `boost` 参数改变：
 [source,js]
 --------------------------------------------------
 GET /_search
@@ -30,16 +27,15 @@ GET /_search
 
 [[query-dsl-match-none-query]]
 [float]
-== Match None Query
+== 无匹配查询
 
-This is the inverse of the `match_all` query, which matches no documents.
-
+这个查询和 `match_all` 查询正好相反，它不会匹配任何文档。
 [source,js]
 --------------------------------------------------
 GET /_search
 {
     "query": {
-        "match_none": {} 
+        "match_none": {}
     }
 }
 --------------------------------------------------
